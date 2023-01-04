@@ -1,6 +1,5 @@
--- for GERTiClient
+-- for GERTi
 local GERTi = require("GERTiClient")
-
 ----------------------------------
 -- ServerFS Host Autorun Script --
 ----------------------------------
@@ -380,6 +379,15 @@ print("Free space on array totals "..serverFS.spaceFree().." bytes")
 print("Total RAM is "..computer.totalMemory().." bytes")
 print("Remaining memory is "..computer.freeMemory().." bytes")
 
+-- Set the ports used --
+local directResponseReceivePort = 300
+local directResponseSendPort = 280
+local indirectReceivePort = 250
+local indirectSendPort = 245
+
+local sendPort = (sendResponseDirectly and directResponseSendPort) or indirectSendPort
+local receivePort = (sendResponseDirectly and directResponseReceivePort) or indirectReceivePort
+
 if GERTi then
 	GERTi.broadcast("Server Filesystem online")
 end
@@ -396,17 +404,17 @@ if showMessagesReceived then
 end
 -- Start recieving messages --
 while true do
-	local evt = {event.pull("GERTData")}
+	local evt = {event.pull("GERTData")} 
 	
 	if #evt[4] > 1 and ((evt[4] ~= lastMessage and evt[4] ~= lastMessage2) or computer.uptime() - lastTime > .1) then
 		if showMessagesReceived then
 			print("Got a message from " .. evt[2] .. ": " .. tostring(evt[4]))
 		end
-		
+			
 		-- Attempt to handle the request
 		local recievedTime = computer.uptime()
 		local arguments = serialization.unserialize(evt[4])
-		
+			
 		-- Did we even get the arguments???
 		if arguments then
 			if serverFS[arguments[1]] then
@@ -432,10 +440,10 @@ while true do
 				local socket1 = GERTi.openSocket(evt[2], evt[3])
 				socket1:write(serialization.serialize({false, "function does not exist"}))
 			end
-			
-			lastMessage2 = lastMessage
-			lastMessage = evt[4]
-			lastTime = computer.uptime()
 		end
+			
+		lastMessage2 = lastMessage
+		lastMessage = evt[4]
+		lastTime = computer.uptime()
 	end
 end
