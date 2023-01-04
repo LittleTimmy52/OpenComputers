@@ -94,7 +94,7 @@ for key, value in ipairs(functionList) do
 						return table.unpack(args)
 					end
 				end
-		end,
+			end
 		__tostring = functionHelp[value] or "function()",
 	})
 end
