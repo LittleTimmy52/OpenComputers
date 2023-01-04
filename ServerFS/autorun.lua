@@ -430,7 +430,6 @@ while true do
 
 				local socket1 = GERTi.openSocket(evt[2], evt[3])
 				socket1:write(serialization.serialize(result))
-				end
 			else
 				local socket1 = GERTi.openSocket(evt[2], evt[3])
 				socket1:write(serialization.serialize({false, "function does not exist"}))
