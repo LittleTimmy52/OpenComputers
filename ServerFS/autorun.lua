@@ -1,4 +1,4 @@
--- for GERTiClient
+-- for GERTi
 local GERTi = require("GERTiClient")
 
 ----------------------------------

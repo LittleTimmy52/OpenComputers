@@ -1,449 +1,189 @@
 -- for GERTi
 local GERTi = require("GERTiClient")
-----------------------------------
--- ServerFS Host Autorun Script --
-----------------------------------
+------------------------------
+-- Server Filesystem Script --
+------------------------------
 -- Configuration --
-local cachedActions = true -- Set this to true to make certain actions cached
-local mordalTextWindow = true -- Set this to true to make the console mordal and clear the terminal.
-local sendResponseDirectly = true -- Set this to true if this computer will send responses to clients without the assistance of another computer.
-local showMessagesReceived = true -- Set this to true to print messages to the terminal.
-local showReturnedVariables = true
-local forceReadOnly = false
-local fsLabelCanBeChanged = false -- Set this to true to allow changes to the filesystem label.
-local handleFix = true -- Set this to true if OpenComputers is updated to a version which does not use number identifation for file handles.
-local autoCheckVersion = true
-local fsLabel = "Server filesystem"
+local timeoutPeriod = 10
+local useTunnelOverModem = true
+local autoMountServerFS = true
+local activateServerFSModule = true
+local virtualizeServerFSComponent = true
+local throwSoftErrors = false
 
--- Modules --
+-- Modules 
 local computer = require("computer")
 local component = require("component")
 local serialization = require("serialization")
 local event = require("event")
-local term = require("term")
+local filesystem = require("filesystem")
 
--- Clear anything on the screen
-if mordalTextWindow then
-	term.clear()
-	term.setCursor(1, 1)
-	term.setCursorBlink(false)
-end
+-- Set up the server filesystem component --
+local serverFS = {
+	type = "filesystem",
+	address = "0000-remoteFS"
+}
+local functionList = {
+	"spaceTotal", "spaceUsed", "spaceFree", "getLabel", "setLabel", "isReadOnly",
+	"exists", "isDirectory", "size", "lastModified", "list",
+	"rename", "remove", "makeDirectory",
+	"open", "close", "read", "write", "seek", 
+}
+local functionHelp = {
+	spaceUsed = "function():number -- The currently used capacity of the file system, in bytes.",
+	spaceFree = "function():number -- The current amount of free space on the file system, in bytes.",
+	open = "function(path:string[, mode:string='r']):number -- Opens a new file descriptor and returns its handle.",
+	seek = "function(handle:number, whence:string, offset:number):number -- Seeks in an open file descriptor with the specified handle. Returns the new pointer position.",
+	makeDirectory = "function(path:string):boolean -- Creates a directory at the specified absolute path in the file system. Creates parent directories, if necessary.",
+	exists = "function(path:string):boolean -- Returns whether an object exists at the specified absolute path in the file system.",
+	isReadOnly = "function():boolean -- Returns whether the file system is read-only.",
+	write = "function(handle:number, value:string):boolean -- Writes the specified data to an open file descriptor with the specified handle.",
+	spaceTotal = "function():number -- The overall capacity of the file system, in bytes.",
+	isDirectory = "function(path:string):boolean -- Returns whether the object at the specified absolute path in the file system is a directory.",
+	rename = "function(from:string, to:string):boolean -- Renames/moves an object from the first specified absolute path in the file system to the second.",
+	list = "function(path:string):table -- Returns a list of names of objects in the directory at the specified absolute path in the file system.",
+	lastModified = "function(path:string):number -- Returns the (real world) timestamp of when the object at the specified absolute path in the file system was modified.",
+	getLabel = "function():string -- Get the current label of the file system.",
+	remove = "function(path:string):boolean -- Removes the object at the specified absolute path in the file system.",
+	close = "function(handle:number) -- Closes an open file descriptor with the specified handle.",
+	size = "function(path:string):number -- Returns the size of the object at the specified absolute path in the file system.",
+	read = "function(handle:number, count:number):string or nil -- Reads up to the specified amount of data from an open file descriptor with the specified handle. Returns nil when EOF is reached.",
+	setLabel = "function(value:string):string -- Sets the label of the file system. Returns the new value, which may be truncated.",
+}
 
-local freeMemory = function()
-	for ilteration = 1, 10 do
-		os.sleep(0)
-	end
-end
-freeMemory() -- Free memory
-
------------------------
--- Set up the server --
------------------------
--- Gets a primary component.
-local getComponent
-getComponent = function(componentType)
-	local success, component = pcall(component.getPrimary, componentType)
-	if success then
-		return component
-	end
-	return false, component
-end
-
-local filesystems = {}
-
--- Find filesystems --
-print("Finding filesystems...")
-local isReadOnly = true
-for address in component.list("filesystem") do
-	local thisComponent = component.proxy(address)
-	-- We do not want to use the filesystem on the temp address or the boot address.
-	if address ~= computer.tmpAddress() and address ~= computer.getBootAddress() then
-		filesystems[address] = thisComponent
-		isReadOnly = forceReadOnly or (isReadOnly and thisComponent.isReadOnly())
-		if not thisComponent.getLabel() or thisComponent.getLabel() == "" then
-			thisComponent.setLabel("ServerFSDisk " .. address:sub(1, 3))
-		end
-	end
-end
-
--- Check if there is at least one filesystem for this server to use --
-local hasFilesystem = false
-for key, value in pairs(filesystems) do
-	hasFilesystem = true
-	break
-end
-if not hasFilesystem then
-	error("No usable filesystems detected. ServerFS requires at least one filesystem not used for booting the system to run.", 0)
-	while true do
-		freeMemory()
-	end
-end
-
--- Build the filesystem variables --
-local spaceTotalCache, spaceFreeCache, spaceUsedCache -- Respective caches
-local listCache -- The directory list cache
-local fileToFS = {} -- Which filesystem to access to find which file.
-local handleToFS = {} -- Which filesystem to access for each handle.
-local handleToNumber = {}
-local numberToHandle = {}
-local serverFS = {type = "filesystem", address = "0000-ServerFS"} -- The filesystem module itself.
-
--- Invalidates the caches.
-local invalidateCache = function()
-	spaceTotalCache, spaceFreeCache, spaceUsedCache = nil, nil, nil
-	if cachedActions then
-		listCache = {}
-	end
-end
-if cachedActions then
-	listCache = {}
-end
-
--- Accoiates files to the correct file system
-local numOfFiles = 0
-local associateFilesInSubDirectories
-associateFilesInSubDirectories = function(filesystem, path)
-	local itemsInDirectory = filesystem.list(path)
-	for key, item in ipairs(itemsInDirectory) do
-		if filesystem.isDirectory(path..item) then
-			associateFilesInSubDirectories(filesystem, path..item)
-		end
-		fileToFS[path..item] = filesystem
-		numOfFiles = numOfFiles + 1
-	end
-	term.setCursor(1, 3)
-	term.clearLine()
-	print(numOfFiles..(numOfFiles == 1 and " file" or " files").." found")
-end
-
--- Ilterate through the filesystems, to find all files in them.
-print("Finding files...")
-for address, filesystem in pairs(filesystems) do
-	associateFilesInSubDirectories(filesystem, "")
-end
-
--- Print the number of files
-term.setCursor(1, 3)
-term.clearLine()
-print(numOfFiles..(numOfFiles == 1 and " file" or " files").." found")
-
-freeMemory() -- Free memory
-
--- Build the library --
-print("Initalizating library...")
-
--- The overall capacity of the file system, in bytes.
-function serverFS.spaceTotal()
-	if spaceTotalCache then
-		return spaceTotalCache
-	end
-	
-	-- Calculate the total space
-	local spaceTotal = 0
-	for address, filesystem in pairs(filesystems) do
-		spaceTotal = spaceTotal + filesystem.spaceTotal()
-	end
-	
-	spaceTotalCache = spaceTotal
-	
-	return tonumber(spaceTotal)
-end
-
--- The currently used capacity of the file system, in bytes.
-function serverFS.spaceUsed()
-	if spaceUsedCache then
-		return spaceUsedCache
-	end
-	
-	-- Calculate the used space
-	local spaceUsed = 0
-	for address, filesystem in pairs(filesystems) do
-		spaceUsed = spaceUsed + filesystem.spaceUsed()
-	end
-	
-	spaceUsedCache = spaceUsed
-	
-	return tonumber(spaceUsed)
-end
-
--- The amount of space free on the file system.
-function serverFS.spaceFree()
-	if spaceFreeCache then
-		return spaceFreeCache
-	end
-	
-	-- Calculate the total and used space
-	local spaceTotal, spaceUsed = 0, 0
-	for address, filesystem in pairs(filesystems) do
-		spaceTotal = spaceTotal + filesystem.spaceTotal()
-		spaceUsed = spaceUsed + filesystem.spaceUsed()
-	end
-	
-	spaceFreeCache = tonumber(spaceTotal - spaceUsed)
-	spaceUsedCache = spaceUsed
-	spaceTotalCache = spaceTotal
-	
-	return tonumber(spaceTotal - spaceUsed)
-end
-
--- Returns whether the file system is read-only.
-function serverFS.isReadOnly()
-	return isReadOnly
-end
-
--- Finds the filesystem to host this path.
--- If a file exists at this path on a filesystem then return the filesystem it is hosted on.
--- If not, then return the filesystem with the most space free.
-local findFSFromPath = function(path)
-	if fileToFS[path] then
-		return fileToFS[path]
-	end
-	
-	-- Find a filesystem to host this file.
-	local largestFreeSpace, usedFileSystem = 0
-	for address, filesystem in pairs(filesystems) do
-		local spaceAvailable = filesystem.spaceTotal() - filesystem.spaceUsed()
-		if spaceAvailable > largestFreeSpace then
-			largestFreeSpace, usedFileSystem = spaceAvailable, filesystem
-		end
-	end
-	fileToFS[path] = usedFileSystem
-	
-	return fileToFS[path]
-end
-
--- Opens a new file descriptor and returns its handle.
-function serverFS.open(path, mode)
-	local filesystem = findFSFromPath(path)
-
-	local handle, errorMessage = filesystem.open(path, mode)
-	if handle then
-		handleToFS[handle] = filesystem
-		if autoCheckVersion then
-			if type(handle) == "table" then
-				handleFix = true
-			else
-				handleFix = false
+-- Build the serverFS component module --
+local lastCall = computer.uptime()
+for key, value in ipairs(functionList) do
+	serverFS[value] = setmetatable({}, {
+		__call = function(self, ...)
+			if computer.uptime() - lastCall < .7 then
+				os.sleep(.7 - (computer.uptime() - lastCall))
 			end
-			autoCheckVersion = false
-		end
-		if handleFix and handle then
-			handleToNumber[handle] = math.floor(math.random()*90000)
-			numberToHandle[handleToNumber[handle]] = handle
-			return handleToNumber[handle], errorMessage
-		else
-			return handle, errorMessage
-		end
-	end
-	
-	return tonumber(handle), errorMessage
+			lastCall = computer.uptime()
+			
+			-- Determine if we want to use the modem or tunnel.
+			if (GERTi) then
+				-- Use the modem
+				GERTi.broadcast(serialization.serialize({value, ...}))
+				while true do
+					local evt = {event.pull("GERTData")}
+
+					if not evt[4] then
+						return false, "The request timed out. The server may not be online or is handling too many requests."
+					end
+					if evt[4] then
+						local args = serialization.unserialize(evt[4])
+						if args[1] == true then
+							table.remove(args, 1)
+						else
+							if throwSoftErrors then
+								return false, args[2]
+							else
+								error(args[1], 2)
+							end
+						end
+						for key, value in pairs(args) do
+							if tonumber(value) then
+								args[key] = tonumber(value)
+							elseif value == "true" then
+								args[key] = true
+							elseif value == "false" then
+								args[key] = false
+							end
+						end
+						return table.unpack(args)
+					end
+				end
+		end,
+		__tostring = functionHelp[value] or "function()",
+	})
 end
 
--- Creates a directory at the specified absolute path in the file system. Creates parent directories, if necessary.
-function serverFS.makeDirectory(path)
-	local success, errorMessage
-	for address, filesystem in pairs(filesystems) do
-		success, errorMessage = filesystem.makeDirectory(path)
+-- Mount this filesystem --
+if autoMountServerFS then
+	local success, errorMessage = filesystem.mount(serverFS, "srv")
+	if not success then
+		io.stderr:write("Failed to mount server: "..tostring(errorMessage).."\n")
 	end
-	invalidateCache()
-	return success, errorMessage
 end
 
--- Creates a directory at the specified absolute path in the file system. Creates parent directories, if necessary.
-function serverFS.exists(path)
-	local filesystem = findFSFromPath(path)
-	return filesystem.exists(path)
+-- Add this to the loaded modules --
+if activateServerFSModule then
+	package.loaded["serverFS"] = serverFS
 end
 
--- Returns a list of names of objects in the directory at the specified absolute path in the file system.
-function serverFS.list(path)
-	if listCache then
-		if listCache[path] then
-			return listCache[path]
+-- Insert the virtual serverFS component to the component API --
+if virtualizeServerFSComponent then
+	pcall(function()
+		local component = require("component")
+		local serverFS = serverFS
+		if not serverFS then
+			serverFS = require("serverFS")
 		end
-	end
-	local completeList = {}
-	for address, filesystem in pairs(filesystems) do
-		local list = filesystem.list(path)
-		if type(list) == "table" then
-			for key, value in ipairs(list) do
-				completeList[#completeList + 1] = value
+
+		local oldDoc = component.doc
+		local oldList = component.list
+		local oldProxy = component.proxy
+		local oldInvoke = component.invoke
+		local oldMethods = component.methods
+		local oldType = component.type
+
+		local sfsAddress = serverFS.address
+
+		function component.doc(address, method)
+			if address == sfsAddress then
+				return tostring(serverFS[method])
 			end
+			return oldDoc
 		end
-	end
-	
-	if listCache then
-		listCache[path] = completeList
-	end
-	
-	return completeList
-end
-
--- Removes the object at the specified absolute path in the file system.
-function serverFS.remove(path)
-	local filesystem = findFSFromPath(path)
-	invalidateCache()
-	return filesystem.remove(path)
-end
-
--- Returns whether the object at the specified absolute path in the file system is a directory.
-function serverFS.isDirectory(path)
-	local filesystem = findFSFromPath(path)
-	return filesystem.isDirectory(path)
-end
-
--- Returns the size of the object at the specified absolute path in the file system.
-function serverFS.size(path)
-	local filesystem = findFSFromPath(path)
-	return tonumber(filesystem.size(path))
-end
-
--- Returns the (real world) timestamp of when the object at the specified absolute path in the file system was modified.
-function serverFS.lastModified(path)
-	local filesystem = findFSFromPath(path)
-	return tonumber(filesystem.lastModified(path))
-end
-
--- Renames a file.
-function serverFS.rename(path, newPath)
-	local filesystem = findFSFromPath(path)
-	invalidateCache()
-	return filesystem.rename(path, newPath)
-end
-
--- Get the current label of the file system.
-function serverFS.getLabel()
-	return fsLabel
-end
-
--- Sets the label of the file system. Returns the new value, which may be truncated.
-function serverFS.setLabel(newLabel)
-	if fsLabelCanBeChanged then
-		if type(newLabel) == "string" then
-			fsLabel = newLabel:sub(1, 80)
-		end
-	end
-	return fsLabel
-end
-
--- Seeks in an open file descriptor with the specified handle. Returns the new pointer position.
-function serverFS.seek(handle, ...)
-	if handleFix then
-		handle = numberToHandle[handle]
-	end
-	if handleToFS[handle] then
-		return handleToFS[handle].seek(handle, ...)
-	end
-end
-
--- Writes the specified data to an open file descriptor with the specified handle.
-function serverFS.write(handle, ...)
-	if handleFix then
-		handle = numberToHandle[handle]
-	end
-	if handleToFS[handle] then
-		return handleToFS[handle].write(handle, ...)
-	end
-end
-
--- Reads up to the specified amount of data from an open file descriptor with the specified handle. Returns nil when EOF is reached.
-function serverFS.read(handle, ...)
-	if handleFix then
-		handle = numberToHandle[handle]
-	end
-	if handleToFS[handle] then
-		return handleToFS[handle].read(handle, ...)
-	end
-end
-
--- Closes an open file descriptor with the specified handle.
-function serverFS.close(handle, ...)
-	if handleFix then
-		handle = numberToHandle[handle]
-	end
-	if handleToFS[handle] then
-		invalidateCache()
-		return handleToFS[handle].close(handle, ...)
-	end
-end
-
-package.loaded["serverFS"] = serverFS
-
--- Free up unused memory --
-print("Freeing memory...")
-freeMemory() -- Free memory
-
-print("Total array capacity is "..serverFS.spaceTotal().." bytes")
-print("Used array capacity is "..serverFS.spaceUsed().." bytes")
-print("Free space on array totals "..serverFS.spaceFree().." bytes")
-print("Total RAM is "..computer.totalMemory().." bytes")
-print("Remaining memory is "..computer.freeMemory().." bytes")
-
--- Set the ports used --
-local directResponseReceivePort = 300
-local directResponseSendPort = 280
-local indirectReceivePort = 250
-local indirectSendPort = 245
-
-local sendPort = (sendResponseDirectly and directResponseSendPort) or indirectSendPort
-local receivePort = (sendResponseDirectly and directResponseReceivePort) or indirectReceivePort
-
-if GERTi then
-	GERTi.broadcast("Server Filesystem online")
-end
-
--- Activate the messaging system --
-print("Activating message system...")
-
-local lastMessage, lastMessage2 -- This is used to stop duplicate packets from being sent to relays and cause a cycle.
-local lastTime = -.1
-
-print("Server ready to handle requests.")
-if showMessagesReceived then
-	print("Waiting for message...")
-end
--- Start recieving messages --
-while true do
-	local evt = {event.pull("GERTData")} 
-	
-	if #evt[4] > 1 and ((evt[4] ~= lastMessage and evt[4] ~= lastMessage2) or computer.uptime() - lastTime > .1) then
-		if showMessagesReceived then
-			print("Got a message from " .. evt[2] .. ": " .. tostring(evt[4]))
-		end
-			
-		-- Attempt to handle the request
-		local recievedTime = computer.uptime()
-		local arguments = serialization.unserialize(evt[4])
-			
-		-- Did we even get the arguments???
-		if arguments then
-			if serverFS[arguments[1]] then
-				local functToCall = serverFS[arguments[1]]
-				table.remove(arguments, 1)
-				local result = {pcall(functToCall, table.unpack(arguments))}
-				if not result[1] then
-					io.stderr:write("Failed to handle request: "..tostring(result[2]).."\n")
+		function component.list(filter, exact)
+			if type(filter) == "string" then
+				if (exact and filter == "filesystem") or (not exact and filter:find(("filesystem"):sub(1, #filter))) then
+					local realItems = {}
+					for x, y in oldList(filter, exact or false) do
+						realItems[x] = y
+					end
+					realItems[sfsAddress] = serverFS.type
+					local ilterator = function()
+						for x, y in pairs(realItems) do
+							coroutine.yield(x, y)
+						end
+					end
+					return coroutine.wrap(ilterator)
 				end
-					
-				if showReturnedVariables then
-					print(result[1], result[2], result[3])
-				end
-					
-				-- Allow the computer to get the message
-				if computer.uptime() - recievedTime < .1 then
-					os.sleep(.1)
-				end
-
-				local socket1 = GERTi.openSocket(evt[2], evt[3])
-				socket1:write(serialization.serialize(result))
-			else
-				local socket1 = GERTi.openSocket(evt[2], evt[3])
-				socket1:write(serialization.serialize({false, "function does not exist"}))
+				return oldList(filter, exact)
 			end
+			return oldList(filter, exact)
 		end
-			
-		lastMessage2 = lastMessage
-		lastMessage = evt[4]
-		lastTime = computer.uptime()
-	end
+		function component.proxy(address)
+			if address == sfsAddress then
+				return serverFS
+			end
+			return oldProxy(address)
+		end
+		function component.invoke(address, funct, ...)
+			if address == sfsAddress then
+				return serverFS[funct](...)
+			end
+			return oldInvoke(address, funct, ...)
+		end
+		function component.methods(address)
+			if address == sfsAddress then
+				local functions = {}
+				for key, value in pairs(serverFS) do
+					if type(value) == "function" then
+						functions[key] = false
+					end
+				end
+				return functions
+			end
+			return oldMethods(address)
+		end
+		function component.type(address)
+			if address == sfsAddress then
+				return "filesystem"
+			end
+			return oldType(address)
+		end
+	end)
 end
