@@ -55,14 +55,16 @@ local functionHelp = {
 local lastCall = computer.uptime()
 print("lastCall: " .. lastCall)
 for key, value in ipairs(functionList) do
-	print("key: " .. key)
+print("key: " .. key)
 	serverFS[value] = setmetatable({}, {
 		__call = function(self, ...)
+		print("__call" .. __call)
 			if computer.uptime() - lastCall < .7 then
 				os.sleep(.7 - (computer.uptime() - lastCall))
 			end
 			lastCall = computer.uptime()
 			print("lastCall: " .. lastCall)
+			print("GERTi" .. GERTi)
 			
 			-- Determine if we want to use the modem or tunnel.
 			if (GERTi) then
@@ -101,9 +103,9 @@ for key, value in ipairs(functionList) do
 						return table.unpack(args)
 					end
 				end
-			end
-		__tostring = functionHelp[value] or "function()"
-		})
+			end,
+		__tostring = functionHelp[value] or "function()",
+	})
 end
 
 -- Mount this filesystem --
