@@ -58,7 +58,6 @@ for key, value in ipairs(functionList) do
 	print("key: " .. key)
 	serverFS[value] = setmetatable({}, {
 		__call = function(self, ...)
-		print("__call" .. __call)
 			if computer.uptime() - lastCall < .7 then
 				os.sleep(.7 - (computer.uptime() - lastCall))
 			end
@@ -103,8 +102,9 @@ for key, value in ipairs(functionList) do
 					end
 				end
 			end
-		__tostring = functionHelp[value] or "function()",
-end})
+		__tostring = functionHelp[value] or "function()"
+		})
+end
 
 -- Mount this filesystem --
 if autoMountServerFS then
