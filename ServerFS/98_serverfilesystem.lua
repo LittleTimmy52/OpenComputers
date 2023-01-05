@@ -53,20 +53,27 @@ local functionHelp = {
 
 -- Build the serverFS component module --
 local lastCall = computer.uptime()
+print("lastCall: " .. lastCall)
 for key, value in ipairs(functionList) do
+	print("key: " .. key)
 	serverFS[value] = setmetatable({}, {
 		__call = function(self, ...)
+		print("__call" .. __call)
 			if computer.uptime() - lastCall < .7 then
 				os.sleep(.7 - (computer.uptime() - lastCall))
 			end
 			lastCall = computer.uptime()
+			print("lastCall: " .. lastCall)
 			
 			-- Determine if we want to use the modem or tunnel.
 			if (GERTi) then
 				-- Use the modem
 				GERTi.broadcast(serialization.serialize({value, ...}))
+				print(GERTi.broadcast(serialization.serialize({value, ...})))
 				while true do
 					local evt = {event.pull("GERTData")}
+					print("evt" .. serialization.serialize(evt))
+					print("evt[4]" .. evt[4])
 
 					if not evt[4] then
 						return false, "The request timed out. The server may not be online or is handling too many requests."
@@ -91,10 +98,11 @@ for key, value in ipairs(functionList) do
 								args[key] = false
 							end
 						end
+						print("table.unpack(args)" .. table.unpack(args))
 						return table.unpack(args)
 					end
 				end
-			end
+			end,
 		__tostring = functionHelp[value] or "function()",
 	})
 end
