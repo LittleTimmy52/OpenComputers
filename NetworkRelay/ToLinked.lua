@@ -9,6 +9,9 @@ local relayAddr = "addr"
 -- set reue if using above
 local useAbove = true
 
+-- print data
+local printMsg = true
+
 local function main()
 	-- gather nessicairy data
 	local _, _, from, port, _, data = event.pull("modem_message")
@@ -23,9 +26,18 @@ local function main()
 		-- add data to the table
 		table.insert(evtDat, port)
 		table.insert(evtDat, data)
+		
+		if printMsg == true then
+			print("event data: " .. tprint(evtDat))
+		end
 
 		-- serialize and send over the linked card
 		local serEvt = serialization.serialize(evtDat)
+
+		if printMsg == true then
+			print("serialized data: " .. serEvt)
+		end
+
 		tunnel.send(serEvt)
 	end
 end
