@@ -4,9 +4,9 @@ local event = require("event")
 local modem = component.modem
 
 while true do
-	local evt = {event.pull("modem_message")}
-	if evt[1] ~= 
-	local unserEvt = serialization.unserialize(evt[6])
-	if unserEvt[4]
-	modem.broadcast(unserEvt[4], unserEvt[6])
+	local _, _, _, port, _, data = event.pull("modem_message")
+	if port = 0 then
+		unserEvt = serialization.unserialize(data)
+		modem.broadcast(unserEvt[1], unserEvt[2])
+	end
 end
