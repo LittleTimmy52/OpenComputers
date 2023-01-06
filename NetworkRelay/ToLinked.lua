@@ -28,7 +28,10 @@ local function main()
 		table.insert(evtDat, data)
 		
 		if printMsg == true then
-			print("event data: " .. tprint(evtDat))
+			print("event data:")
+			for k,v in pairs(unserEvt) do
+				print(tostring(k)..": "..tostring(v))
+			end
 		end
 
 		-- serialize and send over the linked card

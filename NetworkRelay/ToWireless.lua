@@ -25,7 +25,10 @@ local function main()
 
 		if printMsg == true then
 			print("is port " .. unserEvt[1] .. " open? " .. modem.isOpen(unserEvt[1]))
-			print("unserialized table: " .. tprint(unserEvt))
+			print("unserialized table:")
+			for k,v in pairs(unserEvt) do
+				print(tostring(k)..": "..tostring(v))
+			end
 		end
 
 		modem.broadcast(unserEvt[1], unserEvt[2])
