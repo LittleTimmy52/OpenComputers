@@ -3,7 +3,7 @@
 ## Purpose
 This is for simply relaying wireless network data over a linked card.
 
-## Other
-I currently have this split into 2 scripts, I need to firs get it working then I need to consolidate it.
-This also can only deal with broadcasted data and I need to make some way for sending, maybe some extra function to send to a computer connected to the relay, but Ill
-need to figure it out later.
+wireless message --> link card --> linkcard --> wireless message and visa versa
+
+## Other info & todo
+This is spit into 2, but it works, all I need to do is make it into 1 script and make sending to a specific computer work, if possible.
