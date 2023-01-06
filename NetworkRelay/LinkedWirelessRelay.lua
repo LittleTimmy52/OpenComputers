@@ -47,6 +47,24 @@ local function main()
 		end
 
 		tunnel.send(serEvt)
+	else
+		if printMsg == true then
+			print("port: " .. port .. " data: " .. data)
+		end
+
+		-- unserialize and broadcast
+		modem.open(unserEvt[1])
+		unserEvt = serialization.unserialize(data)
+
+		if printMsg == true then
+			print("is port " .. unserEvt[1] .. " open? " .. modem.isOpen(unserEvt[1]))
+			print("unserialized table:")
+			for k,v in pairs(unserEvt) do
+				print(tostring(k)..": "..tostring(v))
+			end
+		end
+
+		modem.broadcast(unserEvt[1], unserEvt[2])
 	end
 end
 

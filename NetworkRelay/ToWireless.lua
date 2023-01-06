@@ -7,11 +7,6 @@ local modem = component.modem
 local printMsg = true
 
 local function main()
-	-- open the port on all modems
-	for addr, t in component.list("modem") do
-		component.invoke(addr, "open", 123)
-	end
-
 	-- gather nessicairy data
 	local _, _, _, port, _, data = event.pull("modem_message")
 	if port = 0 then
@@ -36,5 +31,5 @@ local function main()
 end
 
 while true do
-main()
+	main()
 end
