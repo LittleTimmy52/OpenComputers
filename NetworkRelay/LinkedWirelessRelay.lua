@@ -2,15 +2,14 @@ local component = require("component")
 local serialization = require("serialization")
 local event = require("event")
 local tunnel = component.tunnel
+local modem = component.modem
 
--- set to addr of any nearby relays wireless networkcard to avoid send loop
-local relayAddr = "addr"
 
--- set reue if using above
-local useAbove = true
-
--- print data
-local printMsg = true
+-- config
+local relayAddr = "addr" -- set to addr of any nearby relays wireless networkcard to avoid send loop
+local useAbove = true -- set reue if using above
+local ports = {300, 280, 250, 245} -- set to a port for relaying
+local printMsg = true -- print data
 
 local function main()
 	-- gather nessicairy data
@@ -23,7 +22,10 @@ local function main()
 
 	-- open the port on all modems
 	for addr, t in component.list("modem") do
-		component.invoke(addr, "open", 123)
+		-- component.invoke(addr, "open", 123)
+		fro k,v in ipairs(ports) do
+			component.invoke(addr, "open", v)
+		end
 	end
 
 	-- check if it's a wireless network message
@@ -57,9 +59,9 @@ local function main()
 		unserEvt = serialization.unserialize(data)
 
 		if printMsg == true then
-			print("is port " .. unserEvt[1] .. " open? " .. modem.isOpen(unserEvt[1]))
+			print("is port " .. unserEvt[1] .. " open? " .. tostring(modem.isOpen(unserEvt[1])))
 			print("unserialized table:")
-			for k,v in pairs(unserEvt) do
+			for k,v in ipairs(unserEvt) do
 				print(tostring(k)..": "..tostring(v))
 			end
 		end

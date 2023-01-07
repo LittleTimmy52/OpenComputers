@@ -3,6 +3,6 @@
     "",
     "\\NetworkRelay"
   ],
-  "SelectedNode": "\\NetworkRelay\\ToWireless.lua",
+  "SelectedNode": "\\NetworkRelay\\LinkedWirelessRelay.lua",
   "PreviewInSolutionExplorer": false
 }
