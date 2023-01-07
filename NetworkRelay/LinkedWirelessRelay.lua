@@ -6,8 +6,7 @@ local modem = component.modem
 
 
 -- config
-local relayAddr = "addr" -- set to addr of any nearby relays wireless networkcard to avoid send loop
-local useAbove = true -- set reue if using above
+local ignoreAddr = {} -- set to the wireless network card of any computer to ignore
 local ports = {300, 280, 250, 245} -- set to a port for relaying
 local printMsg = true -- print data
 
@@ -16,14 +15,15 @@ local function main()
 	local _, _, from, port, _, data = event.pull("modem_message")
 	evtDat = {}
 
-	if useAbove == true then
-		if from == relayAddr then return end
+	if ignoreAddr then
+		for k,v in ipairs(ignoreAddr) do
+			if from == v then return end
+		end
 	end
 
 	-- open the port on all modems
 	for addr, t in component.list("modem") do
-		-- component.invoke(addr, "open", 123)
-		fro k,v in ipairs(ports) do
+		for k,v in ipairs(ports) do
 			component.invoke(addr, "open", v)
 		end
 	end
@@ -34,7 +34,7 @@ local function main()
 		table.insert(evtDat, port)
 		table.insert(evtDat, data)
 		
-		if printMsg == true then
+		if printMsg then
 			print("event data:")
 			for k,v in pairs(unserEvt) do
 				print(tostring(k)..": "..tostring(v))
@@ -44,13 +44,13 @@ local function main()
 		-- serialize and send over the linked card
 		local serEvt = serialization.serialize(evtDat)
 
-		if printMsg == true then
+		if printMsg then
 			print("serialized data: " .. serEvt)
 		end
 
 		tunnel.send(serEvt)
 	else
-		if printMsg == true then
+		if printMsg then
 			print("port: " .. port .. " data: " .. data)
 		end
 
