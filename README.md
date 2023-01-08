@@ -3,4 +3,16 @@
 The purpose of this repo is to simply host my code and projects for oprncomputers
 
 ## What I have
-I am working on convrting a ServerFS script to use GERTi. I am also working on making a relay like script to send broadcasted wireless data over a linked card
+
+### ServerFS
+This is my wip conversion at converting an existing serverFS to us GERTi
+
+### NetworkRelay
+This relays wireless messages over long distannces via linked cards. The 2 relay computers need a linked and wireless network card, 
+the computer takes wireless messages, serializes the data, sends it over the linked card to the other which then broadcasts it over
+the wireless card. 
+
+wireless message <-> linked message <-> linked message <-> wireless message
+
+### Address to file
+This saves all components to a file, the other script inserts a specified component address into a specified script at the top

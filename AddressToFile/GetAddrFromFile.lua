@@ -11,8 +11,10 @@ if filesystem.exists(tostring(arg[1])) then
 	file:close()
 elseif tostring(arg[1]) == "-h" then
 	print("Usage: getAddrFromFile <pathOfAddressFile> <componentName> <pathOfFileToInsertIn>")
+	return
 else
 	print("ERROR: This is an invalid path.")
+	return
 end
 
 -- find the component and store its address
@@ -35,7 +37,9 @@ if compAddr then
 		file:close()
 	else
 		print("ERROR: This is an invalid path.")
+		return
 	end
 else
 	print("ERROR: The component specified wasn't found")
+	return
 end

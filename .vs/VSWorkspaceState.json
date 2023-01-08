@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
+    "\\AddressToFile",
     "\\NetworkRelay"
   ],
-  "SelectedNode": "\\NetworkRelay\\LinkedWirelessRelay.lua",
+  "SelectedNode": "\\AddressToFile\\README.md",
   "PreviewInSolutionExplorer": false
 }

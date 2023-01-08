@@ -6,6 +6,7 @@ local arg = ...
 
 if tostring(arg) == "-h" then
 	print("addressToFile <pathToSave>")
+	return
 else
 	-- store all component addresses
 	local compAddrs = component.list()
