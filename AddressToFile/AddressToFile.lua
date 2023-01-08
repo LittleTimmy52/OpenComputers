@@ -12,7 +12,7 @@ else
 	local serCompAddrs = serialization.serialize(compAddrs)
 
 	-- writes the addresses to a file
-	file = io.open(tostring(arg))
+	file = io.open(tostring(arg), "w")
 	file:write(serCompAddrs)
 	file:close()
 end

@@ -7,7 +7,7 @@ local arg = {...}
 if filesystem.exists(tostring(arg[1])) then
 	-- open file and save it's data then close it
 	file = io.open(tostring(arg[1]))
-	local addrTable = serialization.unserialize(file:read(100000))
+	addrTable = serialization.unserialize(file:read("*a"))
 	file:close()
 elseif tostring(arg[1]) == "-h" then
 	print("Usage: getAddrFromFile <pathOfAddressFile> <componentName> <pathOfFileToInsertIn>")
@@ -16,21 +16,25 @@ else
 end
 
 -- find the component and store its address
-for v,k in ipairs(addrTable) do
-	if string.find(tostring(k), arg[2]) then
-		local compAddr = tostring(k)
+for k,v in pairs(addrTable) do
+	if string.find(tostring(v), tostring(arg[2])) then
+		compAddr = tostring(v) .. " " .. tostring(k)
 	end
 end
 
 -- if the address is found
 if compAddr then
 	-- does the file to onsert to exist
-	if filesystem.exists(tostring(arg[3]))
-		-- open the file to insert into
+	if filesystem.exists(tostring(arg[3])) then
+		-- open the file to insert into and copy its data and combine with new data
+		file = io.open(tostring(arg[3]), "r")
+		data = compAddr .. "\n" .. file:read("*a")
+		file:close()
 		file = io.open(tostring(arg[3]), "w")
-		data = compAddr .. "\n" .. file:read(100000)
+		file:write(data)
+		file:close()
 	else
-		print("ERROR: This is an invalid path.")	
+		print("ERROR: This is an invalid path.")
 	end
 else
 	print("ERROR: The component specified wasn't found")
