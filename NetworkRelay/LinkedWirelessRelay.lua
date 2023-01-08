@@ -11,20 +11,21 @@ local ports = {300, 280, 250, 245} -- set to a port for relaying
 local printMsg = true -- print data
 
 local function main()
-	-- gather nessicairy data
-	local _, _, from, port, _, data = event.pull("modem_message")
-	evtDat = {}
-
-	if ignoreAddr then
-		for k,v in ipairs(ignoreAddr) do
-			if from == v then return end
-		end
-	end
-
 	-- open the port on all modems
 	for addr, t in component.list("modem") do
 		for k,v in ipairs(ports) do
 			component.invoke(addr, "open", v)
+		end
+	end
+
+	-- gather nessicairy data
+	local _, _, from, port, _, data = event.pull("modem_message")
+	evtDat = {}
+
+	-- ignore any messages from ports to ignore
+	if ignoreAddr then
+		for k,v in ipairs(ignoreAddr) do
+			if from == v then return end
 		end
 	end
 
