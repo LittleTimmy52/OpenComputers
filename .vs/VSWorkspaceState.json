@@ -2,8 +2,9 @@
   "ExpandedNodes": [
     "",
     "\\AddressToFile",
-    "\\NetworkRelay"
+    "\\NetworkRelay",
+    "\\ServerFS"
   ],
-  "SelectedNode": "\\AddressToFile\\README.md",
+  "SelectedNode": "\\ServerFS\\98_serverfilesystem.lua",
   "PreviewInSolutionExplorer": false
 }
