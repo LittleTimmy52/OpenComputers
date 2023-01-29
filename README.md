@@ -17,5 +17,9 @@ wireless message <-> linked message <-> linked message <-> wireless message
 ### Address to file
 This saves all components to a file, the other script inserts a specified component address into a specified script at the top
 
+### MineOS
+
+This is where anything I made for MineOS is located. Currently just pictures.
+
 ### Security
 This is a collection of my basic security scripts for the OpenSecurity addon to OpenComputers
