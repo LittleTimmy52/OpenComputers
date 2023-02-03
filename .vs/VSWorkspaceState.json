@@ -1,10 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\AddressToFile",
-    "\\NetworkRelay",
-    "\\ServerFS"
+    "\\Security"
   ],
-  "SelectedNode": "\\ServerFS\\98_serverfilesystem.lua",
+  "SelectedNode": "\\Security\\MagCard.lua",
   "PreviewInSolutionExplorer": false
 }

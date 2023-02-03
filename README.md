@@ -1,11 +1,11 @@
 # OpenComputers
 ## Purpose
-The purpose of this repo is to simply host my code and projects for oprncomputers
+The purpose of this repo is to simply host my code and projects for oprncomputers.
 
 ## What I have
 
 ### ServerFS
-This is my wip conversion at converting an existing serverFS to us GERTi
+This is my wip conversion at converting an existing serverFS to us GERTi.
 
 ### NetworkRelay
 This relays wireless messages over long distannces via linked cards. The 2 relay computers need a linked and wireless network card, 
@@ -15,11 +15,14 @@ the wireless card.
 wireless message <-> linked message <-> linked message <-> wireless message
 
 ### Address to file
-This saves all components to a file, the other script inserts a specified component address into a specified script at the top
+This saves all components to a file, the other script inserts a specified component address into a specified script at the top.
 
 ### MineOS
 
 This is where anything I made for MineOS is located. Currently just pictures.
 
 ### Security
-This is a collection of my basic security scripts for the OpenSecurity addon to OpenComputers
+This is a collection of my basic security scripts for the OpenSecurity addon to OpenComputers.
+
+### Robot
+This is a collectioin of any scripts for robots that I have made or will make.

@@ -8,12 +8,12 @@ This is for simply relaying wireless network data over a linked card. This is th
 wireless message --> linked --> linked --> wireless message and visa versa
 
 ### ToLinked
-This is for converting broadcasted data to linked data and then sending it to another linked card
+This is for converting broadcasted data to linked data and then sending it to another linked card.
 
 wireless --> linked -->linked
 
 ### ToWireless
-This is for broadcasting the data that was recieved from the linkcard of the computer running ToLinked
+This is for broadcasting the data that was recieved from the linkcard of the computer running ToLinked.
 
 linked --> wireless
 

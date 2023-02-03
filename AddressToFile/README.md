@@ -13,4 +13,4 @@ This will insert the specified address into the specified script at the top.
 getAddrFromFile \<pathOfAddressFile> \<componentName> \<pathOfFileToInsertIn>
 
 ## ToDo
-possibly consolidate into one script
+possibly consolidate into one script.
