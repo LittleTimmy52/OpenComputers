@@ -1,8 +1,9 @@
 {
   "ExpandedNodes": [
     "",
-    "\\Security"
+    "\\Robot",
+    "\\ServerFS"
   ],
-  "SelectedNode": "\\Security\\MagCard.lua",
+  "SelectedNode": "\\README.md",
   "PreviewInSolutionExplorer": false
 }
