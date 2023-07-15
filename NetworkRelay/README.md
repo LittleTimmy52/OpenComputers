@@ -1,6 +1,7 @@
 # Network relay
 
 ## Purpose
+This is a collection of my rudementary ways of getting a wireless message to a linked card and back to relay information.
 
 ### LinkedWirelessRelay
 This is for simply relaying wireless network data over a linked card. This is the combination of the following two.

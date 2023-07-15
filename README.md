@@ -26,3 +26,9 @@ This is a collection of my basic security scripts for the OpenSecurity addon to 
 
 ### Robot
 This is a collectioin of any scripts for robots that I have made or will make.
+
+### Brrr
+Big Reactors Remote Reactor. This will hold the program to remote start and stop reactors.
+
+### Cryption
+This is my simple tool to encrypt and decrypt single files at a time.
