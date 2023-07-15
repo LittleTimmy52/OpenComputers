@@ -55,7 +55,7 @@ function processFile(mode)
 
     local keyFile = io.open(keyPath, "r")
     if not keyFile then
-        print("No key, please get the key used to encrypt and put it in a file called key.txt in root (" .. '"' .. "/key.txt" .. '"' .. ")")
+        print("No key, please get the key used to encrypt and put it in a file called " .. '"' .. keyPath .. '"')
         os.exit()
     end
 
@@ -63,7 +63,7 @@ function processFile(mode)
     keyFile:close()
 
     if key == nil then
-        print("Key is empty, please get the key used to encrypt and put it in a file called key.txt in root (".. '"' .. "/key.txt" .. '"' .. ")")
+        print("Key is empty, please get the key used to encrypt and put it in a file called ".. '"' .. keyPath .. '"')
         os.exit()
     end
 
@@ -92,11 +92,11 @@ function processFile(mode)
     targetFile:close()
 
     local action = mode == "encrypt" and "encrypted" or "decrypted"
-    print("File " .. action .. ". You can clear /tmp.txt manually or with the clear option.")
+    print("File " .. action .. ". You can clear " .. tmpPath .. " manually or with the clear option.")
 end
 
 function clear()
-	io.open("/tmp.txt", "w"):close()
+	io.open(tmpPath, "w"):close()
 end
 
 -- process args
