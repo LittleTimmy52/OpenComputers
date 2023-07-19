@@ -5,8 +5,7 @@ This is a collection of my very simple security door scripts for the OpenSecurit
 Note: As of making this readme, all doors need their own computer, this may cause lagg for using a lot of doors.
 Note: As of making this readme none of thies use encryption.
 
-## The collection
-
+## What I have
 ### MagCard
 
 This reads the data off a magnetic card, comapirs it to the data in the code, if it matches the door opens, if not it stays closed.

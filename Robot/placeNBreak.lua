@@ -1,9 +1,9 @@
-robot = require("robot")
+local robot = require("robot")
 
 robot.select(1)
-invSize = robot.inventorySize()
+local invSize = robot.inventorySize()
 
-function findItem(next)
+local function findItem(next)
 	local slot = robot.select()
 	local count = robot.count()
 
@@ -17,7 +17,7 @@ function findItem(next)
 	end
 end
 
-function placeNBreak()
+local function placeNBreak()
 	local placed = robot.place()
 	if placed == true then
 		os.sleep(0.2)

@@ -1,5 +1,4 @@
 local component = require("component")
-local serialization = require("serialization")
 local event = require("event")
 local tunnel = component.tunnel
 

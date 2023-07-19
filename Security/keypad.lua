@@ -1,14 +1,14 @@
-component = require("component")
-keypad = component.os_keypad
-doorController = component.os_doorcontroller
-event = require("event")
+local component = require("component")
+local keypad = component.os_keypad
+local doorController = component.os_doorcontroller
+local event = require("event")
 
 local pin = "1234"
 local input = ""
 
 local runInBack = false
 
-function updateDisplay()
+local function updateDisplay()
 	local displayString = ""
 	for i=1,#input do
 		displayString = displayString .. "*"
@@ -17,7 +17,7 @@ function updateDisplay()
 	keypad.setDisplay(displayString, 7)
 end
 
-function checkPin()
+local function checkPin()
 	if input == pin then
 		keypad.setDisplay("GRANTED", 2)
 		doorController.open()
@@ -31,7 +31,7 @@ function checkPin()
 	os.sleep(1)
 end
 
-function keypadEvent(eventName, address, button, button_label)
+local function keypadEvent(eventName, address, button, button_label)
 	if button_label == "*" then
 		input = string.sub(input, 1, -2)
 	elseif button_label == "#" then

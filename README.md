@@ -3,7 +3,6 @@
 The purpose of this repo is to simply host my code and projects for oprncomputers.
 
 ## What I have
-
 ### ServerFS
 This is my wip conversion at converting an existing serverFS to us GERTi.
 
@@ -18,7 +17,6 @@ wireless message <-> linked message <-> linked message <-> wireless message
 This saves all components to a file, the other script inserts a specified component address into a specified script at the top.
 
 ### MineOS
-
 This is where anything I made for MineOS is located. Currently just pictures.
 
 ### Security
@@ -32,3 +30,10 @@ Big Reactors Remote Reactor. This will hold the program to remote start and stop
 
 ### Cryption
 This is my simple tool to encrypt and decrypt single files at a time.
+
+### TrashZip
+This is my simple 7zip knockoff for OpenComputers
+
+## To do
+Make Brrr
+Update wiki
