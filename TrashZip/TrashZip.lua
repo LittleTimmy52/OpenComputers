@@ -130,6 +130,12 @@ local function decompress(path)
     end
     
     local outputDir = shell.getWorkingDirectory() .. "/" .. fs.name(path):match("(.+)%..+$")
+	local counter = 0
+	local d = outputDir
+	while fs.exists(outputDir) do
+		counter = counter + 1
+		outputDir = d .. counter
+	end
     fs.makeDirectory(outputDir)
 
 	local errorCount = 0
