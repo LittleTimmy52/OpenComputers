@@ -34,6 +34,9 @@ This is my simple tool to encrypt and decrypt single files at a time.
 ### TrashZip
 This is my simple 7zip knockoff for OpenComputers
 
+### Door
+This is my program to open and close doors or any other redstone powered thing with the use of microcontrollers
+
 ## To do
 Make Brrr
 Update wiki
