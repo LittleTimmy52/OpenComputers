@@ -55,15 +55,17 @@ local function compress(path)
 						if (fs.name(elementPath) ~= zipPath) or (shell.getWorkingDirectory() .. "/" .. zipPath ~= elementPath) and not ((fs.name(elementPath) ~= zipPath) and (shell.getWorkingDirectory() .. "/" .. zipPath ~= elementPath)) then
 							if (fs.size(elementPath) < 99000 and not elementPath:match("%.zip$") and elementPath:match(".+/[%w/]+%..+$") ~= nil) then
 								-- read and compress file content
-								file:write(elementPath .. "\n")
-
 								local file2 = io.open(elementPath, "r")
+								local fileContent = {}
 								for line in file2:lines() do
-									file:write(data.encode64(data.deflate(line)) .. "\n")
+									table.insert(fileContent, line)
 									os.sleep(0)
 								end
-
 								file2:close()
+								local compressedContent = data.encode64(data.deflate(serialization.serialize(fileContent)))
+
+								-- write the compressed content to the zip file
+								file:write(elementPath .. "\n" .. compressedContent .. "\n")
 								print(elementPath)
 							else
 								table.insert(notAdded, elementPath)
@@ -83,16 +85,15 @@ local function compress(path)
 			local suscess, result = pcall(function()
 				if(fs.size(path) < 99000 and not path:match("%.zip$") and path:match(".+/[%w/]+%..+$") ~= nil) then
 					-- read and compress file content
-					file:write(elementPath .. "\n")
-
-					local file2 = io.open(elementPath, "r")
+					local file2 = io.open(path, "r")
+					local fileContent = {}
 					for line in file2:lines() do
-						file:write(data.encode64(data.deflate(line)) .. "\n")
-						os.sleep(0)
+						table.insert(fileContent, line)
 					end
+					local compressedContent = data.encode64(data.deflate(serialization.serialize(fileContent)))
 
-					file2:close()
-					print(elementPath)
+					-- write the compressed content to the zip file
+					file:write(tostring(path .. "\n" .. compressedContent))
 
 					-- renameing is for dual extension bug
 					fs.rename(path .. ".zip", path:match("(.+)%..+$") .. ".zip")
@@ -123,7 +124,7 @@ local function compress(path)
 end
 
 local function decompress(path)
-	if path == nil or not fs.exists(path) or fs.isDirectory(path) then
+    if path == nil or not fs.exists(path) or fs.isDirectory(path) then
         print("No specified file")
         os.exit()
     end
@@ -141,36 +142,36 @@ local function decompress(path)
 	local errorFiles = {}
 
 	local file = io.open(path, "r")
-	local newFile = nil
-	local newFileDir = nil
 	for line in file:lines() do
 		if line:match("^/.+/$") ~= nil and not line:match("[^/]+%..+") then
-			if newFile then
-				newFile:close()
-			end
-
 			fs.makeDirectory(outputDir .. line)
 			print(outputDir .. line)
 			os.sleep(0)
 		elseif line:match(".+/[%w/]+%..+$") ~= nil then
-			if newFile then
-				newFile:close()
-			end
-
-			newFileDir = outputDir .. line
-			newFile = io.open(newFileDir, "w")
-			print(newFileDir)
+			newFile = io.open(outputDir .. line, "w")
+			print(outputDir .. line)
 			os.sleep(0)
 		else
 			local success, result = pcall(function()
-				local lineDat = data.inflate(data.decode64(line))
-				newFile:write(lineDat .. "\n")
+				local fileContent = line
+				os.sleep(0)
+				fileContent = data.decode64(fileContent)
+				os.sleep(0)
+				fileContent = data.inflate(fileContent)
+				os.sleep(0)
+				fileContent = serialization.unserialize(fileContent)
+				os.sleep(0)
+				for _,v in pairs(fileContent) do
+					newFile:write(v .. "\n")
+				end
+				newFile:close()
+				print("Data written")
 			end)
 
 			if not success and result ~= nil then
 				print("Error: " .. result)
 				errorCount = errorCount + 1
-				table.insert(errorFiles, tostring(newFileDir))
+				table.insert(errorFiles, fs.name(newFile))
 				newFile:close()
 			end
 		end
