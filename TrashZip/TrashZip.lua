@@ -53,7 +53,7 @@ local function compress(path)
 					-- pcall is here because very large files error out
 					local success, result = pcall(function()
 						if (fs.name(elementPath) ~= zipPath) or (shell.getWorkingDirectory() .. "/" .. zipPath ~= elementPath) and not ((fs.name(elementPath) ~= zipPath) and (shell.getWorkingDirectory() .. "/" .. zipPath ~= elementPath)) then
-							if (fs.size(elementPath) < 99000 and not elementPath:match("%.zip$") and elementPath:match(".+/[%w/]+%..+$") ~= nil) then
+							if elementPath:match(".+/[%w/]+%..+$") ~= nil then
 								-- read and compress file content
 								file:write(elementPath .. "\n")
 
@@ -81,7 +81,7 @@ local function compress(path)
 			end
 		else
 			local suscess, result = pcall(function()
-				if(fs.size(path) < 99000 and not path:match("%.zip$") and path:match(".+/[%w/]+%..+$") ~= nil) then
+				if path:match(".+/[%w/]+%..+$") ~= nil then
 					-- read and compress file content
 					file:write(elementPath .. "\n")
 
