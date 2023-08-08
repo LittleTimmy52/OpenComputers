@@ -3,12 +3,20 @@
 This simply is to encrypt or decrypt any single file with the best encryption allowed by the data card installed.
 
 ## What I have
+### Cryption
+This program is a combination of the 2 tiers and will encrypt accordingly based on the tier.
+
+CryptionT2 \<option: key, encrypt, decrypt, clear, help> \<option: path>
+
+### CryptionT1
+This program encodes rather than encrypts, but its the best the T1 data card can do
+
+CryptionT1 \<option: encrypt, decrypt, clear, help> \<option: path>
+
 ### CryptionT2
-This can encrypt and decrypt with aes-128 and needs a T2 data card
+This program can encrypt and decrypt with aes-128 and needs a T2 data card
 
 CryptionT2 \<option: key, encrypt, decrypt, clear, help> \<option: path>
 
 ## To do
 MineOS port?
-Make T1 and T3 version
-Make one that knows what tier the card is and will do the encryption possible by it.

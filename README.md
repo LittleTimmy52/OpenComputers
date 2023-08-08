@@ -4,7 +4,7 @@ The purpose of this repo is to simply host my code and projects for oprncomputer
 
 ## What I have
 ### ServerFS
-This is my wip conversion at converting an existing serverFS to us GERTi.
+This will be my own file system over a server program.
 
 ### NetworkRelay
 This relays wireless messages over long distannces via linked cards. The 2 relay computers need a linked and wireless network card, 
@@ -26,7 +26,7 @@ This is a collection of my basic security scripts for the OpenSecurity addon to 
 This is a collectioin of any scripts for robots that I have made or will make.
 
 ### Brrr
-Big Reactors Remote Reactor. This will hold the program to remote start and stop reactors.
+Big Reactors Remote Reactor. This will hold the program to remote start and stop reactors along with monitoring.
 
 ### Cryption
 This is my simple tool to encrypt and decrypt single files at a time.
@@ -39,4 +39,5 @@ This is my program to open and close doors or any other redstone powered thing w
 
 ## To do
 Make Brrr
+make serverFS
 Update wiki

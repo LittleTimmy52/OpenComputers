@@ -1,4 +1,6 @@
-local data = require("component").data
+local component = require("component")
+local computer = component.computer
+local data = component.data
 local shell = require("shell")
 
 local keyPath = "/.key.txt"
@@ -55,8 +57,25 @@ local function processFile(mode)
 		os.exit()
 	end
 
+	local dataTier = nil
+	if component.isAvailable("data") then
+		local devices = computer.getDeviceInfo()
+	
+		for address, info in pairs(devices) do
+			if info.type == "data" then
+				local tier = info.tier
+	
+				if tier == 1 then
+					dataTier = 1
+				elseif tier >= 2 then
+					dataTier = 2
+				end
+			end
+		end
+	end
+
 	local keyFile = io.open(keyPath, "r")
-	if not keyFile then
+	if not keyFile and dataTier == 2 then
 		print("No key, generate one with the key function or put an existing key in " .. '"' .. keyPath .. '"')
 		os.exit()
 	end
@@ -64,11 +83,11 @@ local function processFile(mode)
 	local key = keyFile:read("*all")
 	keyFile:close()
 
-	if key == nil then
+	if key == nil and dataTier == 2 then
 		print("Key is empty, generate one with the key function or put an existing key in ".. '"' .. keyPath .. '"')
 		os.exit()
 	end
-
+	
 	-- copy the file contents to the temporary file
 	local tmpFile = io.open(tmpPath, "w")
 	local file = io.open(arg[2], "r")
@@ -84,7 +103,13 @@ local function processFile(mode)
 		tmpFile = io.open(tmpPath, "r")
 		file = io.open(arg[2], "w")
 		for line in tmpFile:lines() do
-			file:write(data.encode64(data.encrypt(line, key, key)) .. "\n")
+			line = tostring(line)
+			if dataTier == 1 then
+				file:write(data.encode64(line) .. "\n")
+			else
+				file:write(data.encode64(data.encrypt(line, key, key)) .. "\n")
+			end
+
 			os.sleep(0)
 		end
 
@@ -94,7 +119,12 @@ local function processFile(mode)
 		tmpFile = io.open(tmpPath, "r")
 		file = io.open(arg[2], "w")
 		for line in tmpFile:lines() do
-			file:write(data.decrypt(data.decode64(line), key, key) .. "\n")
+			if dataTier == 1 then
+				file:write(data.decode64(line) .. "\n")
+			else
+				file:write(data.decrypt(data.decode64(line), key, key) .. "\n")
+			end
+
 			os.sleep(0)
 		end
 
