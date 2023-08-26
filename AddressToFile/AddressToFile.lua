@@ -1,4 +1,5 @@
 local component = require("component")
+local serialization = require("serialization")
 
 local arg = ...
 
