@@ -9,12 +9,6 @@ This is the zip and unzip program itself used to compress and decompress data.
 
 TrashZip \<option: compress, decompress, help> \<option: full path>
 
-### TrashZipLegacy
-This is the old version of trash zip that is here for compatibility. The only difference is in how the data is structured before
-compression and after, the new one does it diffrently by going by line rather than having the whole file done at once.
-
-TrashZipLegacy \<option: compress, decompress, help> \<option: full path>
-
 ## To do
 make my own compression
 make it make an actual zip
