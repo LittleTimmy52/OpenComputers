@@ -18,10 +18,5 @@ This program is a combination of the 2 tiers and will encrypt accordingly based 
 
 Cryption \<option: key, encrypt, decrypt, clear, help> \<option: path>
 
-### CryptionPlus
-This program incorperates TrashZip to encrypt not only files, but folders as well.
-
-CryptionPlus \<option: key, encrypt, decrypt, clear, help> \<option: path>
-
 ## To do
 MineOS port?

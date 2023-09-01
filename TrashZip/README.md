@@ -7,7 +7,7 @@ maybe this functonality may come later. Its called TrashZip because its not the 
 ### Trash zip
 This is the zip and unzip program itself used to compress and decompress data.
 
-TrashZip \<option: compress, decompress, help> \<option: full path>
+TrashZip \<option: compress, decompress, help> \<option: path>
 
 ## To do
 make my own compression

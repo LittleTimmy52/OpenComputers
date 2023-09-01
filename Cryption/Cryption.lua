@@ -10,12 +10,12 @@ local tmpPath = "/.tmp.txt"
 local arg = {...}
 
 local function help()
-	print("This is a simple encrypttion and decryption program. I am not liable for any data loss due to misuse or key loss, nor am I liable for data leaaks, just be responsible")
-	print("Usage: CryptionT2 <option: key, encrypt, decrypt, clear, help> <option: path>")
-	print("key: Generate a key used for encryption and decryption. CryptionT2 key")
-	print("encrypt: Encrypt a file, no directories. CryptionT2 encrypt <path>")
-	print("decrypt: Decrypt an encrypted file no directories. CryptionT2 decrypt <path>")
-	print("clear: Clear the tmp file. be careful, if the file is messed up this is the only backup of sorts made by this program. CryptionT2 clear")
+	print("This is a simple encryption and decryption program which can be used with any tier data card. I am not liable for any data loss due to misuse or key loss, nor am I liable for data leaaks, just be responsible")
+	print("Usage: Cryption <option: key, encrypt, decrypt, clear, help> <option: path>")
+	print("key: Generate a key used for encryption and decryption. Cryption key")
+	print("encrypt: Encrypt a file, no directories. Cryption encrypt <path>")
+	print("decrypt: Decrypt an encrypted file no directories. Cryption decrypt <path>")
+	print("clear: Clear the tmp file. be careful, if the file is messed up this is the only backup of sorts made by this program. Cryption clear")
 	print("help: Display this text")
 end
 
@@ -74,20 +74,25 @@ local function processFile(mode)
 		end
 	end
 
-	local keyFile = io.open(keyPath, "r")
-	if not keyFile and dataTier == 2 then
-		print("No key, generate one with the key function or put an existing key in " .. '"' .. keyPath .. '"')
-		os.exit()
+	local key = nil
+
+	if dataTier == 2 then
+		local keyFile = io.open(keyPath, "r")
+
+		if not keyFile then
+			print("No key, generate one with the key function or put an existing key in " .. '"' .. keyPath .. '"')
+			os.exit()
+		end
+
+		key = keyFile:read("*all")
+		keyFile:close()
+
+		if key == nil then
+			print("Key is empty, generate one with the key function or put an existing key in ".. '"' .. keyPath .. '"')
+			os.exit()
+		end
 	end
 
-	local key = keyFile:read("*all")
-	keyFile:close()
-
-	if key == nil and dataTier == 2 then
-		print("Key is empty, generate one with the key function or put an existing key in ".. '"' .. keyPath .. '"')
-		os.exit()
-	end
-	
 	-- copy the file contents to the temporary file
 	local tmpFile = io.open(tmpPath, "w")
 	local file = io.open(arg[2], "r")

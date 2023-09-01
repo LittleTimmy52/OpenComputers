@@ -13,16 +13,6 @@ local function help()
 	print("help: display this help info")
 end
 
---[[
-	Compress function
-	create a zip file with the files name but if it exists tack an incrementing number to it then add .zip. a.zip a1.zip a2.zip
-	write file path
-	encode deflate line then write it in a new line
-	repeat for every line in the file
-	write end flag of sorts in a new line
-	close file and notify user
-]]
-
 local function compress(path)
 	-- gets the path wether or not its full or from current dir
 	path = shell.resolve(path)
@@ -34,8 +24,14 @@ local function compress(path)
 	end
 
 	-- create the zip file
-	local zipPath = path:match("(.+)%.[^.]*$") .. ".zip"
+	local zipPath = nil
 	local counter = 0
+
+	if fs.isDirectory(path) then
+		zipPath = path .. ".zip"
+	else
+		zipPath = path:match("(.+)%.[^.]*$") .. ".zip"
+	end
 
 	while fs.exists(zipPath) do
 		counter = counter + 1
@@ -49,12 +45,13 @@ local function compress(path)
 	local notAdded = {}
 
 	-- recursion for directories, if not it still works
-	local traverseDirectory(file)
-		if fs.isDirectory(file)
-			file:write(file .. "\n")
+	local function traverseDirectory(filePath)
+		if fs.isDirectory(filePath) then
+			-- directory flag with the path
+			file:write("dir:" .. filePath .. "\n")
 
-			for element in fs.list(file) do
-				local elementPath = fs.concat(path, element)
+			for element in fs.list(filePath) do
+				local elementPath = fs.concat(filePath, element)
 
 				-- do the function again but for sub directory or do single files
 				if fs.isDirectory(elementPath) then
@@ -65,9 +62,10 @@ local function compress(path)
 					local success, result = pcall(function()
 						-- don't zip this file
 						if elementPath ~= zipPath then
-							file:write(elementPath .. "\n"
+							-- file flag with path
+							file:write("file:" .. elementPath .. "\n")
 						
-							-- read line by line and compress then write to zip
+							-- read line, compress, write to zip, then repeat
 							local file2 = io.open(elementPath, "r")
 							for line in file2:lines() do
 								file:write(data.encode64(data.deflate(line)) .. "\n")
@@ -75,10 +73,10 @@ local function compress(path)
 							end
 
 							-- end flag
-							file:write("cd This is the end of this file")
+							file:write("This is the end of this file \n")
 
 							file2:close()
-							print(elementPath))
+							print(elementPath)
 						end
 					end)
 
@@ -91,7 +89,32 @@ local function compress(path)
 				end
 			end
 		else
-			local elementPath = fs.concat(path, element)
+			-- pcall comes in for error reporting
+			local success, result = pcall(function()
+				-- directory flag and path and file flag and path
+				file:write("dir:" .. fs.path(filePath) .. "\n")
+				file:write("file:" .. filePath .. "\n")
+
+				-- read line, compress, write to zip, then repeat
+				local file2 = io.open(path, "r")
+				for line in file2:lines() do
+					file:write(data.encode64(data.deflate(line)) .. "\n")
+					os.sleep(0)
+				end
+
+				-- end flag
+				file:write("This is the end of this file \n")
+
+				file2:close()
+				print(path)
+			end)
+
+			-- for use later to tell user what files were not compressed to zip
+			if not success then
+				print("Error: " .. result)
+				errorCount = errorCount + 1
+				table.insert(notAdded, tostring(elementPath))
+			end
 		end
 	end
 
@@ -101,30 +124,91 @@ local function compress(path)
 
 	-- notify user of errors and completion
 	print("File(s) compressed with " .. errorCount .. " error(s). Saved as " .. zipPath)
-	print(serialization.serialize(notAdded))
-	if notAdded ~= nil then
-		print("The following files were not added for what ever reason, likley a .zip or too large.")
+	if errorCount ~= 0 then
+		print("File(s) effected:")
 		for k,v in ipairs(notAdded) do
 			print(v)
 		end
 	end
 end
 
---[[
-	Decompress function
-	create directory with the name of the zip and tack an incrementing number if it exists a a1 a2
-	read the first line and tack the directory made on to the directory but get rid of extras ex line: /home/testing/ to: /home/test/testing/ not .home/test/home/testing/
-	if the line was a file the same applies, make the directories then make the file
-	once file open read the next line decode and decompress line write it to file
-	repeat until the end flag is read
-	if end flag is read then close file
-	if more are present repeat process for it
-]]
-
 local function decompress(path)
+	-- gets the path wether or not its full or from current dir
+	path = shell.resolve(path)
 
+	-- does it exist?
+	if not fs.exists(path) then
+		print("Please specify file or directory")
+		os.exit()
+	end
+
+	-- output and errors
+	local outputDir = path:match("(.+)%..+$")
+	local counter = 0
+	local tmp = outputDir
+
+	-- make the directory
+	while fs.exists(outputDir) do
+		counter = counter + 1
+		outputDir = tmp .. counter
+	end
+
+	fs.makeDirectory(outputDir)
+
+	-- for error handleing later
+	local errorCount = 0
+	local errorFiles = {}
+
+	-- read zip
+	local file = io.open(path, "r")
+	local newFile
+	local tmp
+	
+	-- the operations
+	for line in file:lines() do
+		if string.match(line, "dir:") then -- directory
+			-- make dir and print
+			line = string.gsub(line, "dir:", "")
+			fs.makeDirectory(outputDir .. line)
+			print(outputDir .. line)
+			os.sleep(0)
+		elseif string.match(line,"file:") then -- file
+			-- make file, open, then print
+			line = string.gsub(line, "file:", "")
+			newFile = io.open(outputDir .. line, "w")
+			tmp = outputDir .. line
+			print(outputDir .. line)
+			os.sleep(0)
+		elseif line:match("This is the end of this file") then -- end flag
+			newFile:close()
+			os.sleep(0)
+		else -- data
+			-- write to opened file
+			local success, result = pcall(function()
+				local lineDat = data.inflate(data.decode64(line))
+				newFile:write(lineDat .. "\n")
+			end)
+
+			if not success then
+				print("Error: " .. result)
+				errorCount = errorCount + 1
+				table.insert(errorFiles, tmp)
+			end
+			os.sleep(0)
+		end
+	end
+
+	-- notify user of errors and completion
+	print("File unzipped with " .. errorCount .. " error(s). Saved to " .. outputDir)
+	if errorCount ~= 0 then
+		print("File(s) effected:")
+		for _, v in pairs(errorFiles) do
+			print(v)
+		end
+	end
 end
 
+-- collect arguements
 if arg[1] == "compress" or arg[1] == "zip" then
 	if arg[2] ~= nil then
 		compress(arg[2])

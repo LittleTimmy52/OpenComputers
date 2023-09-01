@@ -8,7 +8,7 @@ local tmpPath = "/.tmp.txt"
 local arg = {...}
 
 local function help()
-	print("This is a simple encrypttion and decryption program. I am not liable for any data loss due to misuse or key loss, nor am I liable for data leaaks, just be responsible")
+	print("This is a simple encryption and decryption program for the tier 2 data card. I am not liable for any data loss due to misuse or key loss, nor am I liable for data leaaks, just be responsible")
 	print("Usage: CryptionT2 <option: key, encrypt, decrypt, clear, help> <option: path>")
 	print("key: Generate a key used for encryption and decryption. CryptionT2 key")
 	print("encrypt: Encrypt a file, no directories. CryptionT2 encrypt <path>")
