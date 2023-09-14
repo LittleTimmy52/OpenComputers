@@ -41,3 +41,11 @@ This is my program to open and close doors or any other redstone powered thing w
 Make Brrr
 make serverFS
 Update wiki
+
+Future projects:
+power management and usage for powerplant
+base monitoring
+drone delivery
+some secure messageing
+world wide web
+ftp
