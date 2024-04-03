@@ -37,6 +37,9 @@ This is my simple 7zip knockoff for OpenComputers
 ### Door
 This is my program to open and close doors or any other redstone powered thing with the use of microcontrollers
 
+### SecureTerminalMessage (STM)
+I am aware that there are other secure messangers but I want to make my own.
+
 ## To do
 Make Brrr
 make serverFS

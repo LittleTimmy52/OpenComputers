@@ -3,7 +3,7 @@ local shell = require("shell")
 
 local keyPath = "/.key.txt"
 local oldKeysPath = "/.oldKeys.txt"
-local tmpPath = "/.tmp.txt"
+local tmpPath = "/tmp/.tmp.txt"
 
 local arg = {...}
 

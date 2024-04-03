@@ -1,21 +1,21 @@
 local component = require("component")
-local computer = component.computer
 local data = component.data
 local shell = require("shell")
 
 local keyPath = "/.key.txt"
 local oldKeysPath = "/.oldKeys.txt"
-local tmpPath = "/.tmp.txt"
+local tmpPath = "/tmp/.tmp.txt"
 
 local arg = {...}
 
 local function help()
 	print("This is a simple encryption and decryption program which can be used with any tier data card. I am not liable for any data loss due to misuse or key loss, nor am I liable for data leaaks, just be responsible")
-	print("Usage: Cryption <option: key, encrypt, decrypt, clear, help> <option: path>")
+	print("Usage: Cryption <option: key, encrypt, decrypt, clear, help> <option: path> <option: 1>")
 	print("key: Generate a key used for encryption and decryption. Cryption key")
 	print("encrypt: Encrypt a file, no directories. Cryption encrypt <path>")
 	print("decrypt: Decrypt an encrypted file no directories. Cryption decrypt <path>")
 	print("clear: Clear the tmp file. be careful, if the file is messed up this is the only backup of sorts made by this program. Cryption clear")
+	print("The third arguement: pass a 1 to use tier 1 function when you have a tier 2.")
 	print("help: Display this text")
 end
 
@@ -57,21 +57,24 @@ local function processFile(mode)
 		os.exit()
 	end
 
-	local dataTier = nil
+	local dataTier = 1
 	if component.isAvailable("data") then
-		local devices = computer.getDeviceInfo()
-	
-		for address, info in pairs(devices) do
-			if info.type == "data" then
-				local tier = info.tier
-	
-				if tier == 1 then
-					dataTier = 1
-				elseif tier >= 2 then
-					dataTier = 2
-				end
-			end
+		local count = 0
+
+		for k, v in pairs(component.methods(data.address)) do
+			count = count + 1
 		end
+
+		if count > 8 then
+			dataTier = 2
+		end
+	end
+
+	if tonumber(arg[3]) == 1 then
+		dataTier = 1
+	elseif arg[3] ~= nil then
+		print("Pass 1 to use tier 1 if you have a tier 2.")
+		os.exit()
 	end
 
 	local key = nil
@@ -111,7 +114,7 @@ local function processFile(mode)
 			line = tostring(line)
 			if dataTier == 1 then
 				file:write(data.encode64(line) .. "\n")
-			else
+			elseif dataTier == 2 then
 				file:write(data.encode64(data.encrypt(line, key, key)) .. "\n")
 			end
 

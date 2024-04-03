@@ -1,7 +1,7 @@
 local data = require("component").data
 local shell = require("shell")
 
-local tmpPath = "/.tmp.txt"
+local tmpPath = "/tmp/.tmp.txt"
 
 local arg = {...}
 
