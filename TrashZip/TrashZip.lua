@@ -1,6 +1,5 @@
 local data = require("component").data
 local fs = require("filesystem")
-local serialization = require("serialization")
 local shell = require("shell")
 
 local arg = {...}
