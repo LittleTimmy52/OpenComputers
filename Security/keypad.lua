@@ -46,9 +46,9 @@ event.listen("keypad", keypadEvent)
 keypad.setDisplay("")
 
 if not runInBack then
-	local = stopMe = false
-	event.listen("interrupted", finction() stopMe = true; end)
-	while not stopMe(0.1) end
+	local stopMe = false
+	event.listen("interrupted", function() stopMe = true; end)
+	while not stopMe do os.sleep(0.1) end
 
 	event.ignore("keypad", keypadEvent)
 

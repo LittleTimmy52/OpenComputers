@@ -8,7 +8,7 @@ local printMsg = true
 local function main()
 	-- gather nessicairy data
 	local _, _, _, port, _, data = event.pull("modem_message")
-	if port = 0 then
+	if port == 0 then
 		if printMsg == true then
 			print("port: " .. port .. " data: " .. data)
 		end
