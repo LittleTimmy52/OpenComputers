@@ -36,3 +36,4 @@ end
 
 This reads input from a keypad and opens the door if the correct pin is inputed. To change the pin simply change the local correctPin
 to the pin you want to open the door.
+To work with rolldoor change the doorcontroller to rolldoorcontroller in line 3 and increase the variable called delay.

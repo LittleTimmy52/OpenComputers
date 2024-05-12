@@ -4,6 +4,7 @@ local doorController = component.os_doorcontroller
 local event = require("event")
 
 local pin = "1234"
+local delay = 2
 local input = ""
 
 local runInBack = false
@@ -21,7 +22,7 @@ local function checkPin()
 	if input == pin then
 		keypad.setDisplay("GRANTED", 2)
 		doorController.open()
-		os.sleep(2)
+		os.sleep(delay)
 		doorController.close()
 	else
 		keypad.setDisplay("DENIED", 4)
@@ -39,6 +40,8 @@ local function keypadEvent(eventName, address, button, button_label)
 	else
 		input = input .. button_label
 	end
+
+	updateDisplay()
 end
 
 event.listen("keypad", keypadEvent)
