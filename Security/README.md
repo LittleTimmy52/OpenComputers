@@ -35,5 +35,9 @@ end
 ### Keypad
 
 This reads input from a keypad and opens the door if the correct pin is inputed. To change the pin simply change the local correctPin
-to the pin you want to open the door.
+to the pin you want to open the door. Multiple keypads work, but display is to one.
 To work with rolldoor change the doorcontroller to rolldoorcontroller in line 3 and increase the variable called delay.
+
+### KeypadAdvanced
+
+This is the exact same as keypad, but it is intended to have a keyboard and monitor inside to enter commands and lock the keypad, also multi keypad is untested.
