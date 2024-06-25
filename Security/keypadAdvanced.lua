@@ -53,34 +53,42 @@ local function keypadEvent(eventName, address, button, button_label)
 end
 
 local function handleKeyboardInput(command)
-	if command == "open" then
+	local cmd, arg = command:match("^(%S+)%s*(%S*)$")
+	if cmd == "open" then
 		doorController.open()
 		keypad.setDisplay("OPENED", 2)
-		print("Door opened.")
-	elseif command == "close" then
+		if tonumber(arg) then
+			os.sleep(tonumber(arg))
+			doorController.close()
+			keypad.setDisplay("CLOSED", 2)
+			print("Door opened for " .. arg .. " seconds.")
+		else
+			print("Door opened.")
+		end
+	elseif cmd == "close" then
 		doorController.close()
 		keypad.setDisplay("CLOSED", 2)
 		print("Door closed.")
-	elseif command == "lock" then
+	elseif cmd == "lock" then
 		keypadEnabled = false
 		keypad.setDisplay("LOCKED", 4)
 		print("Keypad locked.")
-	elseif command == "unlock" then
+	elseif cmd == "unlock" then
 		keypadEnabled = true
 		keypad.setDisplay("")
 		print("Keypad unlocked.")
-	elseif command == "help" then
+	elseif cmd == "help" then
 		print("Commands:")
-		print("  open    - Open the door")
-		print("  close   - Close the door")
-		print("  lock    - Lock the keypad")
-		print("  unlock  - Unlock the keypad")
-		print("  exit    - Exit the program")
-		print("  help    - Show this help message")
-	elseif command == "exit" then
+		print("  open [seconds] - Open the door for a specified number of seconds (if provided), otherwise it stays open")
+		print("  close          - Close the door")
+		print("  lock           - Lock the keypad")
+		print("  unlock         - Unlock the keypad")
+		print("  exit           - Exit the program")
+		print("  help           - Show this help message")
+	elseif cmd == "exit" then
 		stopMe = true
 	else
-		print("Unknown command: " .. command)
+		print("Unknown command: " .. cmd)
 	end
 end
 
