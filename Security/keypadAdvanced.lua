@@ -56,18 +56,15 @@ local function handleKeyboardInput(command)
 	local cmd, arg = command:match("^(%S+)%s*(%S*)$")
 	if cmd == "open" then
 		doorController.open()
-		keypad.setDisplay("OPENED", 2)
 		if tonumber(arg) then
 			os.sleep(tonumber(arg))
 			doorController.close()
-			keypad.setDisplay("CLOSED", 2)
 			print("Door opened for " .. arg .. " seconds.")
 		else
 			print("Door opened.")
 		end
 	elseif cmd == "close" then
 		doorController.close()
-		keypad.setDisplay("CLOSED", 2)
 		print("Door closed.")
 	elseif cmd == "lock" then
 		keypadEnabled = false
