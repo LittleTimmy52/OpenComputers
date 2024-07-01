@@ -3,17 +3,17 @@ local pulseLength = 60 -- 1 minute in seconds
 local delayBetweenPulses = 300 -- 5 minutes in seconds
 
 local function emitPulse()
-	redstone.setOutput(0, true)
-	redstone.setOutput(2, true)
-	redstone.setOutput(3, true)
-	redstone.setOutput(4, true)
-	redstone.setOutput(5, true)
+	redstone.setOutput(0, 15)
+	redstone.setOutput(2, 15)
+	redstone.setOutput(3, 15)
+	redstone.setOutput(4, 15)
+	redstone.setOutput(5, 15)
 	os.sleep(pulseLength)
-	redstone.setOutput(0, false)
-	redstone.setOutput(2, false)
-	redstone.setOutput(3, false)
-	redstone.setOutput(4, false)
-	redstone.setOutput(5, false)
+	redstone.setOutput(0, 0)
+	redstone.setOutput(2, 0)
+	redstone.setOutput(3, 0)
+	redstone.setOutput(4, 0)
+	redstone.setOutput(5, 0)
 end
 
 local function isActive()
