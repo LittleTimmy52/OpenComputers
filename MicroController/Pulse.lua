@@ -1,5 +1,5 @@
 local sides = { "bottom", "north", "east", "south", "west" }
-
+local redstone = require("component").redstone
 local pulseLength = 60 -- 1 minute in seconds
 local delayBetweenPulses = 300 -- 5 minutes in seconds
 local topSide = "up"
