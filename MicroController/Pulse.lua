@@ -1,15 +1,15 @@
 local redstone = component.proxy(component.list("redstone")())
-local pulseLength = 60000 -- 1 minute
-local delayBetweenPulses = 300000 -- 5 minutes
+local pulseLength = 30 -- 30 seconds
+local delayBetweenPulses = 300 -- 5 minutes
 local active = true
 
 local function sleep(delay)
-	local time = os.time()
-	local newTime = time + delay
-	while time < newTime do
-		time = os.time()
-		computer.pullSignal(0.5)	-- not exact, adds delay
-	end
+    local time = os.time()
+    local newTime = time + delay
+    while time < newTime do
+        computer.pullSignal(newTime - time)
+        time = os.time()
+    end
 end
 
 local function mainLoop()
