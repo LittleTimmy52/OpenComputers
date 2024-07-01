@@ -12,7 +12,7 @@ end
 
 local function mainLoop()
 	while true do
-		active = redstone.getInput(1) == false
+		active = redstone.getInput(1) == 0
 
 		if active then
 			redstone.setOutput(0, 15)
