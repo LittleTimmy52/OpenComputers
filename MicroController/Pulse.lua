@@ -1,12 +1,14 @@
 local redstone = component.proxy(component.list("redstone")())
-local pulseLength = 60 -- 1 minute in seconds
-local delayBetweenPulses = 300 -- 5 minutes in seconds
+local pulseLength = 60000 -- 1 minute
+local delayBetweenPulses = 300000 -- 5 minutes
 local active = true
 
 local function sleep(delay)
-	local start = os.clock()
-	while (os.clock() - start) < delay do
-		coroutine.yield()
+	local time = os.time()
+	local newTime = time + delay
+	while time < newTime do
+		time = os.time()
+		computer.pullSignal(0.5)	-- not exact, adds delay
 	end
 end
 
