@@ -1,21 +1,23 @@
-local sides = { "bottom", "north", "east", "south", "west" }
 local redstone = component.proxy(component.list("redstone")())
 local pulseLength = 60 -- 1 minute in seconds
 local delayBetweenPulses = 300 -- 5 minutes in seconds
-local topSide = "up"
 
-local function emitPulse(exceptSide)
-  for _, side in ipairs(sides) do
-	if side ~= exceptSide then
-	  redstone.setOutput(side, true)
-	  os.sleep(pulseLength)
-	  redstone.setOutput(side, false)
-	end
-  end
+local function emitPulse()
+	redstone.setOutput(0, true)
+	redstone.setOutput(2, true)
+	redstone.setOutput(3, true)
+	redstone.setOutput(4, true)
+	redstone.setOutput(5, true)
+	os.sleep(pulseLength)
+	redstone.setOutput(0, false)
+	redstone.setOutput(2, false)
+	redstone.setOutput(3, false)
+	redstone.setOutput(4, false)
+	redstone.setOutput(5, false)
 end
 
 local function isActive()
-  return redstone.getInput(topSide) == false
+  return redstone.getInput(1) == false
 end
 
 local function mainLoop()
@@ -24,11 +26,11 @@ local function mainLoop()
 	  os.sleep(delayBetweenPulses)
 	else
 	  -- Wait for top to be unpowered
-	  while redstone.getInput(topSide) == false do
+	  while redstone.getInput(1) == false do
 		os.sleep(0.1)
 	  end
 	end
-	emitPulse(topSide)
+	emitPulse()
   end
 end
 
