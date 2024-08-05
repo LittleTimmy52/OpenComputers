@@ -40,6 +40,12 @@ This is my program to open and close doors or any other redstone powered thing w
 ### SecureTerminalMessage (STM)
 I am aware that there are other secure messangers but I want to make my own.
 
+### Microcontroller
+This is the collection of microcontroller script, currently Pulse.lua is the only one
+
+### BankTransfer
+This is the bankTransfer program I made for AR2000's bank system
+
 ## To do
 Make Brrr
 make serverFS
@@ -53,4 +59,6 @@ some secure messageing
 world wide web
 ftp
 
-readme for microcontroller and pulse .lua
+make gui of BankTransfer
+
+make this repo compatible with pm-get
