@@ -1,0 +1,10 @@
+{
+	["manifestVersion"] = "1.0",
+	["package"] = "Cryption",
+	["version"] = "1.0",
+	["name"] = "Cryption",
+	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Cryption",
+	["description"] = "Encrypt files",
+	["note] = "Only files not folders",
+	["authors"] = "LittleTimmy52"
+}

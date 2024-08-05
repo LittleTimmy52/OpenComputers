@@ -46,6 +46,12 @@ This is the collection of microcontroller script, currently Pulse.lua is the onl
 ### BankTransfer
 This is the bankTransfer program I made for AR2000's bank system
 
+### SignImages
+Images converted for a image display program
+
+### ComputronicsMusic
+music converted for computronics tapes
+
 ## To do
 Make Brrr
 make serverFS

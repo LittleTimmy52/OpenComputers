@@ -1,0 +1,13 @@
+{
+	"files": [
+			[
+					"keypad.lua",
+					"/usr/bin/"
+			],
+			[
+					"keypadAdvanced.lua",
+					"/usr/bin/"
+			]
+	],
+	"config": []
+}

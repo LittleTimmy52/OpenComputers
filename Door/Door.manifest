@@ -1,0 +1,9 @@
+{
+	["manifestVersion"] = "1.0",
+	["package"] = "Door",
+	["version"] = "1.0",
+	["name"] = "Door",
+	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Door",
+	["description"] = "Controll doors with microcontroler and tablet",
+	["authors"] = "LittleTimmy52"
+}

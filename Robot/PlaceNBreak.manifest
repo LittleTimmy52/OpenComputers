@@ -1,0 +1,9 @@
+{
+	["manifestVersion"] = "1.0",
+	["package"] = "PlaceNBreak",
+	["version"] = "1.0",
+	["name"] = "Place N Break",
+	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Robot",
+	["description"] = "Robot place block and break block",
+	["authors"] = "LittleTimmy52"
+}

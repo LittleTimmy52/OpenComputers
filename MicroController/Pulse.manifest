@@ -1,0 +1,9 @@
+{
+	["manifestVersion"] = "1.0",
+	["package"] = "Pulse",
+	["version"] = "1.0",
+	["name"] = "Pulse",
+	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/MicroController",
+	["description"] = "Microcontroller redstone clock",
+	["authors"] = "LittleTimmy52"
+}

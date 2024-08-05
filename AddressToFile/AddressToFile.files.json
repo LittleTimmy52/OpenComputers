@@ -1,0 +1,13 @@
+{
+	"files": [
+			[
+					"AdressToFile.lua",
+					"/usr/bin/"
+			],
+			[
+					"GetAdressfromFile.lua",
+					"/usr/bin/"
+			]
+	],
+	"config": []
+}

@@ -1,0 +1,10 @@
+{
+	["manifestVersion"] = "1.0",
+	["package"] = "Keypad",
+	["version"] = "1.0",
+	["name"] = "Keypad",
+	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Security",
+	["description"] = "open doors with keypad",
+	["note"] = "Change doorcontroller to rolldoorcontroller to use rool door",
+	["authors"] = "LittleTimmy52"
+}
