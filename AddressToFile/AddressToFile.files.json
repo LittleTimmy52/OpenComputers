@@ -1,11 +1,11 @@
 {
 	"files": [
 			[
-					"AdressToFile.lua",
+					"AddressToFile.lua",
 					"/usr/bin/"
 			],
 			[
-					"GetAdressfromFile.lua",
+					"GetAddrFromFile.lua",
 					"/usr/bin/"
 			]
 	],
