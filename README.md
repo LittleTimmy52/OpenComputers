@@ -2,6 +2,14 @@
 ## Purpose
 The purpose of this repo is to simply host my code and projects for oprncomputers.
 
+## pm-get
+My repository can work with pm-get from AR2000 you can download it via oppm
+Run the following 2:
+oppm register AR2000AR/openComputers_codes
+oppm instal pm_get
+
+Check out the repo: https://github.com/AR2000AR/openComputers_codes
+
 ## What I have
 ### ServerFS
 This will be my own file system over a server program.
