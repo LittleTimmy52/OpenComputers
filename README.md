@@ -2,11 +2,21 @@
 ## Purpose
 The purpose of this repo is to simply host my code and projects for oprncomputers.
 
-## pm-get
+## How to download
+### oppm
+My repo can work with oppm
+Run the following:
+oppm register LittleTimmy52/OpenComputers
+
+To install: oppm install <program>
+
+### pm-get
 My repository can work with pm-get from AR2000 you can download it via oppm
 Run the following 2:
 oppm register AR2000AR/openComputers_codes
 oppm instal pm_get
+
+To install: pm-get install <program>
 
 Check out the repo: https://github.com/AR2000AR/openComputers_codes
 
