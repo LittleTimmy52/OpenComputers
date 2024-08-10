@@ -285,7 +285,7 @@ while not stop do
 			repeat
 				optionsMenu()
 				choice = tonumber(io.read())
-			until choice ~= nil and choice > 0 and choice < 5
+			until choice ~= nil and choice > 0 and choice < 8
 
 			if choice == 1 then
 				register()
