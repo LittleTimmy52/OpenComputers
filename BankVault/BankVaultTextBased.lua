@@ -285,7 +285,7 @@ while not stop do
 
 		local function start()
 			-- load the data
-			local file = io.read(dataPath, "r")
+			local file = io.open(dataPath, "r")
 			if not file then
 				file = io.open(dataPath, "w")
 				for k, v in ipairs(doorControllerUUIDs) do
