@@ -2,7 +2,7 @@
 	["BankVault"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "BankVault",
-		["version"] = "1.0.1",
+		["version"] = "1.0.2",
 		["name"] = "Bank Vault",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/BankVault",
 		["description"] = "A system to controll some vaults",
@@ -10,6 +10,9 @@
 		["dependencies"] = 	{
 			["bank_api"] = "oppm",
 			["libcb"] = "oppm"
+		},
+		["configFiles"] = 	{
+			"/etc/BankVault/"
 		},
 		["archiveName"] = "BankVault.tar"
 	},
@@ -37,12 +40,15 @@
 	["NetworkRelay"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "NetworkRelay",
-		["version"] = "1.0.0",
+		["version"] = "1.0.1",
 		["name"] = "Network Relay",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/NetworkRelay",
 		["description"] = "Relay broadcasted data over link card",
 		["note"] = "I made this before I knew that relays can take linked cards",
 		["authors"] = "LittleTimmy52",
+		["configFiles"] = 	{
+			"/etc/LinkedWirelessRelay/"
+		},
 		["archiveName"] = "NetworkRelay.tar"
 	},
 	["Pulse"] = {
@@ -100,7 +106,7 @@
 	["BankTransfer"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "BankTransfer",
-		["version"] = "1.0.0",
+		["version"] = "1.0.1",
 		["name"] = "Bank Transfer",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/BankTransfer",
 		["description"] = "A way to transfer funds",
@@ -108,6 +114,9 @@
 		["dependencies"] = 	{
 			["bank_api"] = "oppm",
 			["libcb"] = "oppm"
+		},
+		["configFiles"] = 	{
+			"/etc/BankTransfer/"
 		},
 		["archiveName"] = "BankTransfer.tar"
 	}

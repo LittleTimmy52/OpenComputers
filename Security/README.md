@@ -41,3 +41,7 @@ To work with rolldoor change the doorcontroller to rolldoorcontroller in line 3 
 ### KeypadAdvanced
 
 This is the exact same as keypad, but it is intended to have a keyboard and monitor inside to enter commands and lock the keypad, also multi keypad is untested.
+
+## To do
+make the advanced version of magcard and make the correct data a list so multiple things can be correct
+possibly make it need some encryption

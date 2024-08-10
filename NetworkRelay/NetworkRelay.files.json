@@ -5,5 +5,10 @@
 					"/usr/bin/"
 			]
 	],
-	"config": []
+	"config": [
+		[
+			"LinkedWirelessRelay.cfg",
+			"/etc/LinkedWirelessRelay/"
+		]
+	]
 }

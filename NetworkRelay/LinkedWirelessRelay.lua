@@ -1,13 +1,32 @@
 local component = require("component")
 local event = require("event")
+local serialization = require("serialization")
 local tunnel = component.tunnel
 local modem = component.modem
 
-
--- config
+-- defaults
 local ignoreAddr = {} -- set to the wireless network card of any computer to ignore
 local ports = {300, 280, 250, 245} -- set to a port for relaying
 local printMsg = true -- print data
+
+-- load config
+local conf = io.open("/etc/LinkedWirelessRelay/LinkedWirelessRelay.cfg", "r")
+if conf then
+	for line in conf:lines() do
+		local k, v = line:match("^(%w+)%s*=%s*(%S+)$")
+		if k == "ignoreAddr" then
+			ignoreAddr = serialization.unserialize(v)
+		elseif k == "ports" then
+			ports = serialization.unserialize(v)
+		elseif k == "printMsg" then
+			printMsg = (v == "true")
+		end
+	end
+else
+	conf = io.open("/etc/LinkedWirelessRelay/LinkedWirelessRelay.cfg", "w")
+	conf:write("ignoreAddr={}\nports={300,280,250,245}\nprintMsg=true")
+	conf:close()
+end
 
 local function main()
 	-- open the port on all modems

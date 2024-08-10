@@ -5,5 +5,10 @@
 					"/usr/bin/"
 			]
 	],
-	"config": []
+	"config": [
+		[
+			"BankTransfer.cfg",
+			"/etc/BankTransfer/"
+		]
+	]
 }

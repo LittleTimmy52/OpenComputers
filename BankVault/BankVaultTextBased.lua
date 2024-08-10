@@ -3,14 +3,35 @@ local bank = require("bank_api")
 local event = require("event")
 local term = require("term")
 local component = require("component")
+local serialization = require("serialization")
 local proxy =  component.proxy
 
 local run = true
 local stop = false
 
+-- defaults
 local adminPassword = "123456789"
 local dataPath = "/.data.txt"
 local doorControllerUUIDs = {}
+
+-- load config
+local conf = io.open("/etc/BankVault/BankVault.cfg", "r")
+if conf then
+	for line in conf:lines() do
+		local k, v = line:match("^(%w+)%s*=%s*(%S+)$")
+		if k == "adminPassword" then
+			adminPassword = v
+		elseif k == "dataPath" then
+			dataPath = v
+		elseif k == "doorControllerUUIDs" then
+			doorControllerUUIDs = serialization
+		end
+	end
+else
+	conf = io.open("/etc/BankVault/BankVault.cfg", "w")
+	conf:write("adminPassword=123456789\ndataPath=/.data.txt\ndoorControllerUUIDs={}")
+	conf:close()
+end
 
 local data = {{}}
 

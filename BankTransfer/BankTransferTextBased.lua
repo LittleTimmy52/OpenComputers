@@ -10,8 +10,29 @@ local stop = false
 
 local uuids = {}
 local uuidNames = {}
+
+-- defaults
 local uuidPath = "/.uuids.txt"
 local adminPassword = "123456789"
+
+-- load conf
+local conf = io.open("/etc/BankTransfer/BankTransfer.cfg", "r")
+if conf then
+	for line in conf:lines() do
+		local k, v = line:match("^(%w+)%s*=%s*(%S+)$")
+		if k == "uuidPath" then
+			uuidPath = v
+		elseif k == "adminPassword" then
+			adminPassword = v
+		end
+	end
+
+	conf:close()
+else
+	conf = io.open("/etc/BankTransfer/BankTransfer.cfg", "w")
+	conf:write("uuidPath=/.uuids.txt\nadminPassword=123456789")
+	conf:close()
+end
 
 while not stop do
 	local status = pcall(function()

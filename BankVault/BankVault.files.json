@@ -5,5 +5,10 @@
 					"/usr/bin/"
 			]
 	],
-	"config": []
+	"config": [
+		[
+			"BankVault.cfg",
+			"/etc/BankVault/"
+		]
+	]
 }
