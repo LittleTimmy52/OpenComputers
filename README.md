@@ -86,3 +86,5 @@ ftp
 make gui of BankTransfer
 
 make this repo compatible with pm-get
+
+make any config settings have a config file rather than  just in file

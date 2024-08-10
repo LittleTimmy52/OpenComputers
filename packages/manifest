@@ -2,7 +2,7 @@
 	["BankVault"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "BankVault",
-		["version"] = "1.1",
+		["version"] = "1.0.1",
 		["name"] = "Bank Vault",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/BankVault",
 		["description"] = "A system to controll some vaults",
@@ -16,7 +16,7 @@
 	["Cryption"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "Cryption",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Cryption",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Cryption",
 		["description"] = "Encrypt files",
@@ -27,7 +27,7 @@
 	["TrashZip"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "TrashZip",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Trash Zip",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Security",
 		["description"] = "Compress files/dirs",
@@ -37,7 +37,7 @@
 	["NetworkRelay"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "NetworkRelay",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Network Relay",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/NetworkRelay",
 		["description"] = "Relay broadcasted data over link card",
@@ -48,7 +48,7 @@
 	["Pulse"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "Pulse",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Pulse",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/MicroController",
 		["description"] = "Microcontroller redstone clock",
@@ -58,7 +58,7 @@
 	["MagCard"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "MagCard",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Mag Card",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Security",
 		["description"] = "open doors with magnetic cards",
@@ -69,7 +69,7 @@
 	["Keypad"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "Keypad",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Keypad",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Security",
 		["description"] = "open doors with keypad",
@@ -80,7 +80,7 @@
 	["PlaceNBreak"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "PlaceNBreak",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Place N Break",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Robot",
 		["description"] = "Robot place block and break block",
@@ -90,7 +90,7 @@
 	["Door"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "Door",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Door",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Door",
 		["description"] = "Controll doors with microcontroler and tablet",
@@ -100,7 +100,7 @@
 	["BankTransfer"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "BankTransfer",
-		["version"] = "1.0",
+		["version"] = "1.0.0",
 		["name"] = "Bank Transfer",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/BankTransfer",
 		["description"] = "A way to transfer funds",
