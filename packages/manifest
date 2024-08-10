@@ -1,4 +1,18 @@
 {
+	["BankVault"] = {
+		["manifestVersion"] = "1.0",
+		["package"] = "BankVault",
+		["version"] = "1.0",
+		["name"] = "Bank Vault",
+		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/BankVault",
+		["description"] = "A system to controll some vaults",
+		["authors"] = "LittleTimmy52",
+		["dependencies"] = 	{
+			["bank_api"] = "oppm",
+			["libcb"] = "oppm"
+		},
+		["archiveName"] = "BankVault.tar"
+	},
 	["Cryption"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "Cryption",
