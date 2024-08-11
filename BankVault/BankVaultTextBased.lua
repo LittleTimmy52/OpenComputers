@@ -1,5 +1,4 @@
 local libCB = require("libCB")
-local bank = require("bank_api")
 local event = require("event")
 local term = require("term")
 local component = require("component")
