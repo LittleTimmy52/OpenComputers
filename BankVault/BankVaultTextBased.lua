@@ -24,7 +24,7 @@ if conf then
 		elseif k == "dataPath" then
 			dataPath = v
 		elseif k == "doorControllerUUIDs" then
-			doorControllerUUIDs = serialization
+			doorControllerUUIDs = serialization.unserialize(v)
 		end
 	end
 else
