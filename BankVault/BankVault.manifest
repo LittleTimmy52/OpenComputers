@@ -1,7 +1,7 @@
 {
 	["manifestVersion"] = "1.0",
 	["package"] = "BankVault",
-	["version"] = "1.0.4",
+	["version"] = "1.0.5",
 	["name"] = "Bank Vault",
 	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/BankVault",
 	["description"] = "A system to controll some vaults",

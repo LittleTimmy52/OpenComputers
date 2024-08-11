@@ -148,7 +148,7 @@ while not stop do
 
 				-- save this to the list
 				for k, v in ipairs(data) do
-					if v[3] == choice then
+					if tonumber(v[3]) == choice then
 						data[k][2] = cbData.uuid
 						break
 					end
@@ -216,7 +216,7 @@ while not stop do
 
 				-- save this to the list
 				for k, v in ipairs(data) do
-					if v[3] == choice then
+					if tonumber(v[3]) == choice then
 						data[k][2] = "nil"
 						break
 					end
@@ -253,7 +253,7 @@ while not stop do
 				-- find the users data
 				local usrDat = {}
 				for _, v in ipairs(data) do
-					if v[3] == choice then
+					if tonumber(v[3]) == choice then
 						usrDat = v
 						break
 					end
