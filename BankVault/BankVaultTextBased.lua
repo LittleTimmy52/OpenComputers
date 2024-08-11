@@ -33,7 +33,7 @@ else
 	conf:close()
 end
 
-local data = {{}}
+local data = {}
 
 while not stop do
 	local status = pcall(function()
@@ -126,7 +126,7 @@ while not stop do
 					local avaliable = {}
 					for _, v in ipairs(data) do
 						if v[2] == "nil" then
-							avaliable.insert(v[3])
+							table.insert(avaliable, tonumber(v[3]))
 						end
 					end
 
@@ -210,7 +210,7 @@ while not stop do
 
 					-- confirm choice
 					term.clear()
-					print("Is " .. choice .. " correct?")
+					print("Is " .. choice .. " correct? (yes y or no n)")
 					ans = io.read()
 				until choice ~= nil and choice > 0 and choice < #data + 1 and (string.lower(ans) == "yes" or string.lower(ans) == "y")
 
@@ -246,7 +246,7 @@ while not stop do
 
 					-- confirm choice
 					term.clear()
-					print("Is " .. choice .. " correct?")
+					print("Is " .. choice .. " correct? (yes y or no n)")
 					ans = io.read()
 				until choice ~= nil and choice > 0 and choice < #data + 1 and (string.lower(ans) == "yes" or string.lower(ans) == "y")
 
