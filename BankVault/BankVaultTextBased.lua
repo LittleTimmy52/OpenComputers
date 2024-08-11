@@ -241,7 +241,7 @@ while not stop do
 				local ans
 				repeat
 					term.clear()
-					print("Enter the number of the vault to unregister:")
+					print("Enter the number of the vault to " .. operation .. ":")
 					choice = tonumber(io.read())
 
 					-- confirm choice
