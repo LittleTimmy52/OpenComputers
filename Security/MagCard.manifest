@@ -2,7 +2,7 @@
 	["manifestVersion"] = "1.0",
 	["package"] = "MagCard",
 	["version"] = "1.0.0",
-	["name"] = "Mag Card",
+	["name"] = "MagCard",
 	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Security",
 	["description"] = "open doors with magnetic cards",
 	["note"] = "Change doorcontroller to rolldoorcontroller to use rool door",

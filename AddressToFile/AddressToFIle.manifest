@@ -2,7 +2,7 @@
 	["manifestVersion"] = "1.0",
 	["package"] = "AddressToFile",
 	["version"] = "1.0.0",
-	["name"] = "Address To File",
+	["name"] = "AddressToFile",
 	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/AddressToFile",
 	["description"] = "Get component address and insert to program",
 	["authors"] = "LittleTimmy52"

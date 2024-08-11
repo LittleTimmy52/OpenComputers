@@ -2,7 +2,7 @@
 	["manifestVersion"] = "1.0",
 	["package"] = "BankTransfer",
 	["version"] = "1.0.1",
-	["name"] = "Bank Transfer",
+	["name"] = "BankTransfer",
 	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/BankTransfer",
 	["description"] = "A way to transfer funds",
 	["authors"] = "LittleTimmy52",

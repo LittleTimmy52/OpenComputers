@@ -2,7 +2,7 @@
 	["manifestVersion"] = "1.0",
 	["package"] = "NetworkRelay",
 	["version"] = "1.0.1",
-	["name"] = "Network Relay",
+	["name"] = "NetworkRelay",
 	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/NetworkRelay",
 	["description"] = "Relay broadcasted data over link card",
 	["note"] = "I made this before I knew that relays can take linked cards",

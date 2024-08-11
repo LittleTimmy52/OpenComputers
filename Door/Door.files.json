@@ -2,6 +2,10 @@
 	"files": [
 			[
 					"Door.lua",
+					"/usr/bin/"
+			],
+			[
+					"DoorControl.lua",
 					"/home/EEPROMCode/"
 			]
 	],

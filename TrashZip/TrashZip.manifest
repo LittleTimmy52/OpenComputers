@@ -2,7 +2,7 @@
 	["manifestVersion"] = "1.0",
 	["package"] = "TrashZip",
 	["version"] = "1.0.0",
-	["name"] = "Trash Zip",
+	["name"] = "TrashZip",
 	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/TrashZip",
 	["description"] = "Compress files/dirs",
 	["authors"] = "LittleTimmy52"
