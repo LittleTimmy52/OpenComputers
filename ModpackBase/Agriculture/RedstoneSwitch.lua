@@ -1,6 +1,5 @@
 local modem = component.proxy(component.list("modem")())
 local redstone = component.proxy(component.list("redstone")())
-local computer = component.proxy(component.list("computer")())
 
 local name = "1"
 local devicesControlled = "{item1:1:1000, item2:2:1000, item3:3:1000}"	-- itemname:signalAssigned:limit
@@ -27,7 +26,7 @@ local function messageHandler(message, from)
 		redstone.setOutput(1, 0)
 	end
 
-	modem.broadcast(port, "Acknowlaged")
+	modem.send(from, port, "Acknowlaged")
 end
 
 while true do

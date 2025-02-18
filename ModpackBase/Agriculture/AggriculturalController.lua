@@ -13,6 +13,7 @@ local recieved = false
 local timeOut = 2
 local iterationLimit = 15
 local checkInterval = 15
+local listDelay = 5
 
 local width, height = gpu.getResolution()
 
@@ -152,141 +153,39 @@ physicleReset()
 local check = coroutine.create(function() while true do checkStorage() os.sleep(checkInterval) end end)
 coroutine.resume(check)
 
--- UI
+while true do
+	os.sleep(0)
+end
 
 --[[
 
 
 
-fix the ui menu
 
-
-
-find a way to get inoput in a nonblocking way
-
-
-
-maybe event drivewn
+make the network protocol more secure
 
 
 
 
 
+make seperate ui program
 
-the below is a incorrect and b incomplete
+
+
+
+
+make config file
+
+
+
+
+maybe make this an rc program then make some frontend
+
+
+
 
 
 
 
 
 ]]
-local function mainMenu()
-	term.clear()
-	print("AggriculturalController")
-	print("------------------------")
-	print("1: View data")
-	print("2: Manual toggle")
-	print("3: Manual update")
-	print("4: Exit")
-	print("Please enter your choice: (1-5)")
-end
-
-local function viewDataMenu()
-	term.clear()
-	print("View Data")
-	print("------------------------")
-	print("1: List devices")
-	print("2: Device details")
-	print("3: Back")
-	print("Please enter your choice (1-3)")
-end
-
-local function deviceListMenu(start, count)
-	term.clear()
-	local linesPrinted = 0
-	print("Registered devices")
-	print("------------------------")
-
-	for i = start, math.min(start + count -1, #infoChart) do
-		local device = infoChart[i]
-		print(i .. ": " .. device.name)
-		linesPrinted = linesPrinted + 1
-		if linesPrinted >= height - 3 then
-			print("Enter any for next page.")
-			unblockRead.read()
-			term.clear()
-			linesPrinted = 0
-		end
-	end
-
-	print("Enter any to return")
-end
-
-local function detailMenu(deviceName, dataType)
-	term.clear()
-	for _, device in ipairs(infoChart) do
-		if device.name == deviceName then
-			if dataType == "items" then
-				print("Items: " .. serialization.serialize(device.items))
-			elseif dataType == "signals" then
-				print("Signals: " .. serialization.serialize(device.signalAssignments))
-			elseif dataType == "limits" then
-				print("Limits: " .. serialization.serialize(device.limits))
-			elseif dataType == "status" then
-				print("Status: " .. serialization.serialize(device.status))
-			end
-
-			print("Enter any to return")
-			unblockRead.read()
-			return
-		end
-	end
-end
-
-local function menuHandler(choice)
-	if choice == "1" then
-		viewDataMenu()
-		local viewChoice = unblockRead.read()
-		if viewChoice == "1" then
-			local devicesPerPage = height - 3
-			deviceListMenu(2, devicesPerPage)
-			mainMenu()
-		elseif viewChoice == "2" then
-			term.clear()
-			print("Enter device name:")
-			local name = unblockRead.read()
-			print("Enter data type (items, signals, limits, status):")
-			local dataType = unblockRead.read()
-			detailMenu(name, dataType)
-			mainMenu()
-		else
-			mainMenu()
-		end
-	elseif choice == "2" then
-		term.clear()
-		print("Enter device name:")
-		local name = unblockRead.read()
-		print("Enter signal:")
-		local signal = tonumber(unblockRead.read())
-
-		if name and signal then
-			modem.broadcast(port, name .. ":toggle:" .. signal)
-		end
-
-		mainMenu()
-	elseif choice == "3" then
-		checkStorage()
-		mainMenu()
-	elseif choice == "4" then
-		coroutine.close(check)
-		os.exit()
-	else
-		mainMenu()
-	end
-end
-
-while true do
-	menuHandler(unblockRead.read())
-
-	os.sleep(0)
-end
