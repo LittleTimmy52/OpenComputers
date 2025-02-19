@@ -3,8 +3,6 @@ local redstone = require("component").redstone
 local event = require("event")
 local serialization = require("serialization")
 local rs = require("component").block_refinedstorage_interface
-local term = require("term")
-local gpu = require("component").gpu
 
 local port = 2025
 
@@ -13,9 +11,6 @@ local recieved = false
 local timeOut = 2
 local iterationLimit = 15
 local checkInterval = 15
-local listDelay = 5
-
-local width, height = gpu.getResolution()
 
 local function physicleReset()
 	-- Output on back of computer the signal
@@ -184,7 +179,8 @@ maybe make this an rc program then make some frontend
 
 
 
-
+the second and fourth thing are neglagable if I can make some front end that
+doesent blobk the working (yeilding to the coroutines)
 
 
 

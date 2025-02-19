@@ -1,9 +1,18 @@
 local modem = component.proxy(component.list("modem")())
 local redstone = component.proxy(component.list("redstone")())
+local sign = component.proxy(component.list("sign")())
 
 local name = "1"
-local devicesControlled = "{item1:1:1000, item2:2:1000, item3:3:1000}"	-- itemname:signalAssigned:limit
 local port = 2025
+
+local n, p = sign.getValue():match("([^\n]+)\n([^\n]+)")
+if n ~= nil and tonumber(p) ~= nil then
+	name = n
+	port = tonumber(p)
+end
+
+-- Must be changed before flashing, this is not set by the sign
+local devicesControlled = "{item1:1:1000, item2:2:1000, item3:3:1000}"	-- itemname:signalAssigned:limit
 
 modem.open(port)
 
