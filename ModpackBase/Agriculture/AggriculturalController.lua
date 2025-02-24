@@ -4,16 +4,39 @@ local event = require("event")
 local serialization = require("serialization")
 local rs = require("component").block_refinedstorage_interface
 
-local port = 2025
-
 local infoChart = {}	-- name:devices it controlls:signal:status:limit (string:table:table:table:table)
 local recieved = false
+
+local port = 2025
 local timeOut = 2
 local iterationLimit = 15
 local checkInterval = 15
 
+-- load conf
+local conf = io.open("/etc/AggriculturalController/AggriculturalController.cfg", "r")
+if conf then
+	for line in conf:lines() do
+		local k, v = line:match("^(%w+)%s*=%s*(%S+)$")
+		if k == "port" then
+			port = tonumber(v)
+		elseif k == "timeOut" then
+			timeOut = tonumber(v)
+		elseif k == "iterationLimit" then
+			iterationLimit = tonumber(v)
+		elseif k == "checkInterval" then
+			checkInterval = tonumber(v)
+		end
+	end
+
+	conf:close()
+else
+	conf = io.open("/etc/AggriculturalController/AggriculturalController.cfg", "w")
+	conf:write("port=2025\ntimeOut=2\niterationLimit=15\ncheckInterval=15")
+	conf:close()
+end
+
 local function physicleReset()
-	-- Output on back of computer the signal
+	-- output on back of computer the signal
 	redstone.setOutput(2, 15)
 
 	for _, v in ipairs(infoChart) do
@@ -76,7 +99,7 @@ local function messageHandler(_, _, from, _, _, message)
 	if string.find(message, "rolecall:") then
 		local parts = {}
 
-		-- Split the main string by :
+		-- split the main string by :
 		for part in string.gmatch(message, "([^:]+)") do
 			table.insert(parts, part)
 		end
@@ -86,7 +109,7 @@ local function messageHandler(_, _, from, _, _, message)
 		local name = parts[1]
 		local itemDataString = parts[2]
 
-		-- Remove curly braces and split by comma
+		-- remove curly braces and split by comma
 		itemDataString = string.sub(itemDataString, 2, -2)
 		local itemStrings = {}
 		for itemString in string.gmatch(itemDataString, "([^,]+)") do
@@ -148,40 +171,7 @@ physicleReset()
 local check = coroutine.create(function() while true do checkStorage() os.sleep(checkInterval) end end)
 coroutine.resume(check)
 
+-- "Ahh, Ahh, Ahh, Ahh, stayin alive, stayin alive"
 while true do
 	os.sleep(0)
 end
-
---[[
-
-
-
-
-make the network protocol more secure
-
-
-
-
-
-make seperate ui program
-
-
-
-
-
-make config file
-
-
-
-
-maybe make this an rc program then make some frontend
-
-
-
-
-the second and fourth thing are neglagable if I can make some front end that
-doesent blobk the working (yeilding to the coroutines)
-
-
-
-]]

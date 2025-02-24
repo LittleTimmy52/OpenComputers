@@ -11,7 +11,7 @@ if n ~= nil and tonumber(p) ~= nil then
 	port = tonumber(p)
 end
 
--- Must be changed before flashing, this is not set by the sign
+-- must be changed before flashing, this is not set by the sign
 local devicesControlled = "{item1:1:1000, item2:2:1000, item3:3:1000}"	-- itemname:signalAssigned:limit
 
 modem.open(port)
