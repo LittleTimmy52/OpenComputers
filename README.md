@@ -70,6 +70,9 @@ Images converted for a image display program
 ### ComputronicsMusic
 music converted for computronics tapes
 
+### Addriculture
+This holds the mess of scripts for my crop farms and such
+
 ## To do
 Make Brrr
 make serverFS
@@ -86,3 +89,12 @@ ftp
 make gui of BankTransfer
 
 make any config settings have a config file rather than  just in file mainly in just security for now
+
+
+
+I think i got osme logic on cryption wrong for the data tier part fix it
+
+
+make the new program wotk with the package manager from ar2000
+
+I changed bank transfer in the end test if it works

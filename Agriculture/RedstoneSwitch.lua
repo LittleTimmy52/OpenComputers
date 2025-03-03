@@ -12,7 +12,7 @@ if n ~= nil and tonumber(p) ~= nil then
 end
 
 -- must be changed before flashing, this is not set by the sign
-local devicesControlled = "{item1:1:1000, item2:2:1000, item3:3:1000}"	-- itemname:signalAssigned:limit
+local itemsControlled = "{item1-1-1000, item2-2-1000, item3-3-1000}"	-- itemname-signalAssigned-limit
 
 modem.open(port)
 
@@ -27,12 +27,12 @@ end
 
 local function messageHandler(message, from)
 	if message == "rolecall" then
-		modem.send(from, port, "rolecal:" .. name .. ":" .. devicesControlled)
-	elseif string.find(message, name .. ":toggle") then
-		local signal = tonumber(string.match(message, ".*:(.*)"))
-		redstone.setOutput(1, signal)
+		modem.send(from, port, "rolecal-" .. name .. "-" .. itemsControlled)
+	elseif string.find(message, name .. "-toggle") then
+		local signal = tonumber(string.match(message, ".*-(.*)"))
+		redstone.setOutput(2, signal)
 		sleep(1)
-		redstone.setOutput(1, 0)
+		redstone.setOutput(2, 0)
 	end
 
 	modem.send(from, port, "Acknowlaged")

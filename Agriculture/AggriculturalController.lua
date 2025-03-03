@@ -3,8 +3,9 @@ local redstone = require("component").redstone
 local event = require("event")
 local serialization = require("serialization")
 local rs = require("component").block_refinedstorage_interface
+local data
 
-local infoChart = {}	-- name:devices it controlls:signal:status:limit (string:table:table:table:table)
+local infoChart = {}	-- name-items it controlls-signal-status-limit (string-table-table-table-table)
 local recieved = false
 
 local port = 2025
@@ -47,9 +48,9 @@ local function physicleReset()
 end
 
 local function toggle(name, signal)
-	local iteration = 0
+	local iteration = -1
 	while recieved == false and iteration < iterationLimit do
-		modem.broadcast(port, name .. ":toggle:" .. signal)
+		modem.broadcast(port, name .. "-toggle-" .. signal)
 		os.sleep(timeOut)
 		iteration = iteration + 1
 	end
@@ -96,11 +97,11 @@ local function checkStorage()
 end
 
 local function messageHandler(_, _, from, _, _, message)
-	if string.find(message, "rolecall:") then
+	if string.find(message, "rolecall-") then
 		local parts = {}
 
-		-- split the main string by :
-		for part in string.gmatch(message, "([^:]+)") do
+		-- split the main string by -
+		for part in string.gmatch(message, "([^-]+)") do
 			table.insert(parts, part)
 		end
 
@@ -120,9 +121,10 @@ local function messageHandler(_, _, from, _, _, message)
 		local signalAssignments = {}
 		local limits = {}
 
+		-- split the items controlled
 		for _, itemString in ipairs(itemStrings) do
 			local parts = {}
-			for itemPart in string.gmatch(itemString, "([^:]+)") do
+			for itemPart in string.gmatch(itemString, "([^-]+)") do
 				table.insert(parts, itemPart)
 			end
 
@@ -145,25 +147,28 @@ local function messageHandler(_, _, from, _, _, message)
 		})
 	elseif message == "Acknowlaged" then
 		recieved = true
-	elseif message == "Reset" then
+	elseif message == "reset" then
 		physicleReset()
+		modem.send(from, port, "reset")
 	elseif message == "getInfo" then
-		modem.send(from, port, serialization.serialize(infoChart))
-	elseif string.find(message, "manualToggle:") then
+		modem.send(from, port, "info-" .. serialization.serialize(infoChart))
+	elseif string.find(message, "manualToggle-") then
 		local parts = {}
-		for part in string.gmatch(message, "([^:]+)") do
+		for part in string.gmatch(message, "([^-]+)") do
 			table.insert(parts, part)
 		end
 
 		toggle(parts[2], parts[3])
+		modem.send(from, port, "toggled")
 	elseif message == "manualUpdate" then
 		checkStorage()
+		modem.send(from, port, "updated")
 	end
 end
 
 event.listen("modem_message", messageHandler)
 
-modem.open(2025)
+modem.open(port)
 
 modem.broadcast(port, "rolecall")
 physicleReset()

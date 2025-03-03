@@ -332,5 +332,5 @@ while not stop do
 		start()
 	end)
 
-	if not status then os.sleep() end
+	if not status then os.sleep(0) end
 end
