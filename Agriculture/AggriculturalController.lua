@@ -9,7 +9,7 @@ local infoChart = {}	-- name-items it controlls-signal-status-limit (string-tabl
 local recieved = false
 
 local port = 2025
-local timeOut = 2
+local timeOut = 10
 local iterationLimit = 15
 local checkInterval = 15
 
@@ -32,7 +32,7 @@ if conf then
 	conf:close()
 else
 	conf = io.open("/etc/AggriculturalController/AggriculturalController.cfg", "w")
-	conf:write("port=2025\ntimeOut=2\niterationLimit=15\ncheckInterval=15")
+	conf:write("port=2025\ntimeOut=10\niterationLimit=15\ncheckInterval=15")
 	conf:close()
 end
 
@@ -151,7 +151,30 @@ local function messageHandler(_, _, from, _, _, message)
 		physicleReset()
 		modem.send(from, port, "reset")
 	elseif message == "getInfo" then
-		modem.send(from, port, "info-" .. serialization.serialize(infoChart))
+		local preData = serialization.serialize(infoChart)
+		local tmp = ""
+		local packets = 0
+
+		-- give the sender the dtarting flag and then the chunks there after
+		modem.send(from, port, "info")
+		for i = 1, #preData do
+			if string.len(tmp) < modem.maxPacketSize() - 7 then
+				tmp = tmp .. string.sub(preData, i, i)
+			else
+				modem.send(from, port, "info-" .. tmp)
+				tmp = ""
+				packets = packets + 1
+			end
+		end
+
+		-- send the last packet
+		if tmp ~= "" then
+			modem.send(from, port, tmp)
+			packets = packets + 1
+		end
+
+		-- tell sender were done
+		modem.send(from, port, "done-" .. tostring(packets))
 	elseif string.find(message, "manualToggle-") then
 		local parts = {}
 		for part in string.gmatch(message, "([^-]+)") do

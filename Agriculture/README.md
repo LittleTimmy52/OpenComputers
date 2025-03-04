@@ -29,14 +29,16 @@ and the back connected via redstone to the toggle mechanism to reset everything 
 
 ### AggriculturalControllerInterface
 This is an interface program for the controller as the name suggests, it is meant to run on either a
-tier 3 computer or tier 2 server because of the tier 3 data card, but thats configurable in the config.
+tier 2 computer or tier 1 server because of the tier 2 data card, but thats configurable in the config.
 Given the autanomus nature of the controller, you cant manually do anything, so using its event driven
 command chain, this program just tells the server to do what you want it to. You can force a reset,
 manually toggle an item, manually update the item quantities list, and get all the information the
 controller has on each item and what have you. Setup is the same as the controller but, you dont need
-a redstone card, and you need a tier 3 datacard. Additionally this interface acts as a bridge to let
+a redstone card, and you need a tier 2 data card. Additionally this interface acts as a bridge to let
 a wireless device talk to the controller, thats whats the data card for, secure messaging if you do
 not want to physically be where the interface is to controll it, like on a tablet or such.
+
+PLEASE RUN GET INFORMATION BEFORE THE OTHER FUNCTIONS TO GET THE INFO CHART FOR OTHER FUNCTIONS
 
 ### RemoteInterfaceRelay
 This is the rc that does exactly the above, just in the background and instead of using keys it uses

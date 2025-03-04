@@ -10,7 +10,7 @@ local run = true
 local width, height = gpu.getResolution()
 
 local port = 2025
-local timeOut = 2
+local timeOut = 10
 local iterationLimit = 15
 
 -- load conf
@@ -30,7 +30,7 @@ if conf then
 	conf:close()
 else
 	conf = io.open("/etc/AggriculturalController/AggriculturalControllerInterface.cfg", "w")
-	conf:write("port=2025\ntimeOut=2\niterationLimit=15\nuseData=true")	-- useData is for the remote rc but they use the same config
+	conf:write("port=2025\ntimeOut=10\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234")	-- useData, password and port2 is for the remote rc but they use the same config
 	conf:close()
 end
 
@@ -60,13 +60,44 @@ while not stop do
 				modem.broadcast(port, "getInfo")
 				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
 
-				if string.find(msg, "info-") then
+				if msg == "info" then
 					recieved = true
-					local tmp = string.gmatch(msg, "([^-]+)")
-					infoChart = serialization.unserialize(tmp[2])
 				end
 
 				iteration = iteration + 1
+			end
+
+			local go = recieved
+			local packetErr = false
+			local packets = {}
+
+			-- if it was recieved, now we wait for the packets
+			while go do
+				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
+				if msg == nil then
+					recieved = false
+					packetErr = true
+					break
+				else
+					-- stop once we get the final packet
+					if msg == string.find("info-") then
+						go = false
+						-- if we got all packets stich it all together
+						if #packet == string.match(msg, "([^-]+)")[2] then
+							local preData = ""
+							for _,v in ipairs(packets) do
+								preData = preData .. v
+							end
+
+							infoChart = serialization.unserialize(preData)
+						else
+							recieved = false
+							packetErr = true
+						end
+					else
+						table.insert(packets, msg)
+					end
+				end
 			end
 
 			local function printTableWithPages(tab, first)
@@ -203,8 +234,13 @@ while not stop do
 					printTableWithPages(infoChart[index][5], "Limit:")
 				end
 			else
-				print("Could not reach the controller server (timed out, limit reached)")
-				os.sleep(5)
+				if packetErr then
+					print("Packets were not recieved properly, please check all connections.")
+					os.sleep(5)
+				else
+					print("Could not reach the controller server (timed out, limit reached).")
+					os.sleep(5)
+				end
 			end
 		end
 
@@ -404,35 +440,3 @@ while not stop do
 
 	if not status then os.sleep(0) end
 end
-
-
-
-
-
-
---[[
-
-
-
-
-missing something very important
-
-
-
-the infoChart would get way too big after about like the 6th microcontroller
-
-
-
-
-I need some reliable way to chunk the data being sent from controller to interface
-
-
-
-
-also make the default timeouts a bit longer
-
-
-
-
-
-]]
