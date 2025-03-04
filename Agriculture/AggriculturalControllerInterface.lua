@@ -5,7 +5,6 @@ local serialization = require("serialization")
 local gpu = require("component").gpu
 
 local infoChart = {}	-- name:items it controlls:signal:status:limit (string:table:table:table:table)
-local recieved = false
 local stop = false
 local run = true
 local width, height = gpu.getResolution()
@@ -52,28 +51,30 @@ while not stop do
 		end
 
 		local function getInfo()
-			infoChart = nil
-			local iteration = -1
 			term.clear()
-			recieved = false
+			local iteration = -1
+			local recieved = false
+
+			-- loop to get the chart lest it fails then you get a message
 			while not recieved and iteration < iterationLimit do
 				modem.broadcast(port, "getInfo")
 				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
 
 				if string.find(msg, "info-") then
 					recieved = true
-					tmp = string.gmatch(msg, "([^-]+)")
+					local tmp = string.gmatch(msg, "([^-]+)")
 					infoChart = serialization.unserialize(tmp[2])
 				end
 
 				iteration = iteration + 1
 			end
 
-			local function printTableWithPages(tab)
-				local lines = 0
+			local function printTableWithPages(tab, first)
+				print(first)
+				local lines = 1
 				for k, v in ipairs(tab) do
 					local line = k .. ": " .. v
-					local linesNeeded = line.len() / width
+					local linesNeeded = string.len(line) / width
 					local linesLeft = (height - lines) - 1
 
 					if linesLeft > linesNeeded then
@@ -109,7 +110,8 @@ while not stop do
 				end
 			end
 
-			if infoChart ~= nil then
+			if recieved then
+				local choice
 				repeat
 					term.clear()
 					print("Information:")
@@ -122,11 +124,14 @@ while not stop do
 					choice = tonumber(io.read())
 				until choice ~= nil and choice > 0 and choice < 7
 
+				term.clear()
+
 				if choice == 1 then
-					local lines = 0
+					print("Names:")
+					local lines = 1
 					for k, v in ipairs(infoChart) do
 						local line = k .. ": " .. v[1]
-						local linesNeeded = line.len() / width
+						local linesNeeded = string.len(line) / width
 						local linesLeft = (height - lines) - 1
 
 						if linesLeft > linesNeeded then
@@ -168,7 +173,7 @@ while not stop do
 						index = tonumber(io.read())
 					until index ~= nil and index > 0 and index < #infoChart + 1
 					
-					printTableWithPages(infoChart[index][2])
+					printTableWithPages(infoChart[index][2], "Items:")
 				elseif choice == 3 then
 					local index = nil
 					repeat
@@ -177,7 +182,7 @@ while not stop do
 						index = tonumber(io.read())
 					until index ~= nil and index > 0 and index < #infoChart + 1
 				
-					printTableWithPages(infoChart[index][3])
+					printTableWithPages(infoChart[index][3], "Signal:")
 				elseif choice == 4 then
 					local index = nil
 					repeat
@@ -186,7 +191,7 @@ while not stop do
 						index = tonumber(io.read())
 					until index ~= nil and index > 0 and index < #infoChart + 1
 				
-					printTableWithPages(infoChart[index][4])
+					printTableWithPages(infoChart[index][4], "Status:")
 				elseif choice == 5 then
 					local index = nil
 					repeat
@@ -195,7 +200,7 @@ while not stop do
 						index = tonumber(io.read())
 					until index ~= nil and index > 0 and index < #infoChart + 1
 				
-					printTableWithPages(infoChart[index][5])
+					printTableWithPages(infoChart[index][5], "Limit:")
 				end
 			else
 				print("Could not reach the controller server (timed out, limit reached)")
@@ -204,20 +209,160 @@ while not stop do
 		end
 
 		local function manToggle()
-			term.clear()
-			
+			local index = nil
+			local signal = nil
+			repeat
+				term.clear()
+				print("Enter microcontroller index (in option 1 of \"Get information\")")
+				index = tonumber(io.read())
+			until index ~= nil and index > 0 and index < #infoChart + 1
+
+			repeat
+				term.clear()
+				print("Enter the signal value (1-15)")
+				signal = tonumber(io.read())
+			until signal ~= nil and signal > 0 and signal < 16
+
+			local iteration = -1
+			local recieved = false
+
+			-- loop to get the reply lest it fails then you get a message
+			while not recieved and iteration < iterationLimit do
+				modem.broadcast(port, "manualToggle-" .. infoChart[index][1] .. tostring(signal))
+				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
+
+				if msg == "toggled" then
+					recieved = true
+				end
+
+				iteration = iteration + 1
+			end
+
+			if not recieved then
+				print("Could not reach the controller server (timed out, limit reached)")
+				os.sleep(5)
+			end
 		end
 
 		local function manReset()
+			local iteration = -1
+			local recieved = false
 
+			-- loop to get the reply lest it fails then you get a message
+			while not recieved and iteration < iterationLimit do
+				modem.broadcast(port, "reset")
+				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
+
+				if msg == "reset" then
+					recieved = true
+				end
+
+				iteration = iteration + 1
+			end
+
+			if not recieved then
+				print("Could not reach the controller server (timed out, limit reached)")
+				os.sleep(5)
+			end
 		end
 
 		local function manUpdate()
+			local iteration = -1
+			local recieved = false
 
+			-- loop to get the reply lest it fails then you get a message
+			while not recieved and iteration < iterationLimit do
+				modem.broadcast(port, "update")
+				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
+
+				if msg == "updated" then
+					recieved = true
+				end
+
+				iteration = iteration + 1
+			end
+
+			if not recieved then
+				print("Could not reach the controller server (timed out, limit reached)")
+				os.sleep(5)
+			end
 		end
 
 		local function help()
+			local helpList = {
+				"Main menu:",
+				"[1] Get information:",
+				"Takes you to a sub menu to provide you the specified information.",
+				"[2] Manual toggle:",
+				"Askes you for the index of the microcontroller and the signal stregnth of the desired output and tells that microcontroller to send that",
+				"redstone signal stregnth to toggle the item assigned to that signal.",
+				"\"[1] Microcontroller names\" of \"[1] Get information\" provides the index.",
+				"[3] Manual reset:",
+				"Pulses a redstone signal to the back of the host which should be wired up in a way such that it turnns everything off",
+				"[4] Manual update:",
+				"Tells the server to update its item list.",
+				"[5] Help:",
+				"Takes you to this very page.",
+				"[6] Exit program:",
+				"Closes the program so you can do whatever you need to do on the device this is on.",
+				"Information:",
+				"[1] Microcontroller names:",
+				"Takes you through a list of names with the index (This is what was refered to when askinbg for index).",
+				"[2] Items controlled:",
+				"Askes for the index of the microcontroller you wish to view and lists the different item oreDict names with their index.",
+				"Note that this index is so you know what is assigned to what. For instance at index 1 is minecraft:dirt, in the other menu options say",
+				"\"[3] Signal assignments\" at index 1 is signal stregnth 1, therefore minecraft:dirt was assigned a signal of 1.",
+				"[3] Signal assignments:",
+				"Askes for the index of the microcontroller you wish to view and lists the different signal assignments with their index.",
+				"Note that the reason for the index is the same as \"[2] Items controlled\".",
+				"[4] Status:",
+				"Askes for the index of the microcontroller you wish to view and lists the different item statuses with their index.",
+				"Note that the reason for the index is the same as \"[2] Items controlled\".",
+				"[5] Limit:",
+				"Askes for the index of the microcontroller you wish to view and lists the different item limits with their index.",
+				"Note that the reason for the index is the same as \"[2] Items controlled\".",
+				"[6] Main menu:",
+				"Takes you back to the main menu."
+			}
 
+			print("Help:")
+			local lines = 1
+			for k, v in ipairs(helpList) do
+				local line = k .. ": " .. v
+				local linesNeeded = string.len(line) / width
+				local linesLeft = (height - lines) - 1
+
+				if linesLeft > linesNeeded then
+					print(line)
+					lines = lines + linesNeeded
+				else
+					print("Press any to continue")
+					local continue = true
+					while continue do
+						local _, _, _, pn = event.pull("key_down", timeOut)
+						if pn ~= nil then
+							continue = false
+						end
+
+						os.sleep(0)
+					end
+
+					term.clear()
+					print(line)
+					lines = 1
+				end
+			end
+
+			print("Press any to continue")
+			local continue = true
+			while continue do
+				local _, _, _, pn = event.pull("key_down", timeOut)
+				if pn ~= nil then
+					continue = false
+				end
+
+				os.sleep(0)
+			end
 		end
 
 		local function main()
@@ -237,10 +382,9 @@ while not stop do
 				manUpdate()
 			elseif choice == 5 then
 				help()
-			else if choice == 6 then
+			elseif choice == 6 then
 				term.clear()
 				stop = true
-				break
 			end
 		end
 
@@ -260,3 +404,35 @@ while not stop do
 
 	if not status then os.sleep(0) end
 end
+
+
+
+
+
+
+--[[
+
+
+
+
+missing something very important
+
+
+
+the infoChart would get way too big after about like the 6th microcontroller
+
+
+
+
+I need some reliable way to chunk the data being sent from controller to interface
+
+
+
+
+also make the default timeouts a bit longer
+
+
+
+
+
+]]

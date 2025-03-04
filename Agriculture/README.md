@@ -38,7 +38,7 @@ a redstone card, and you need a tier 3 datacard. Additionally this interface act
 a wireless device talk to the controller, thats whats the data card for, secure messaging if you do
 not want to physically be where the interface is to controll it, like on a tablet or such.
 
-### RemoteInterface
+### RemoteInterfaceRelay
 This is the rc that does exactly the above, just in the background and instead of using keys it uses
 modem messages. This is the reason for the data card.
 
