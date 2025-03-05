@@ -5,6 +5,59 @@ local serialization = require("serialization")
 local rs = require("component").block_refinedstorage_interface
 local data
 
+--[[
+
+
+
+
+
+
+broken dosent work
+
+
+
+
+
+
+
+
+need to fix before testing any other scripts
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+]]
+
 local infoChart = {}	-- name-items it controlls-signal-status-limit (string-table-table-table-table)
 local recieved = false
 
