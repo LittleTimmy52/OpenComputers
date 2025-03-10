@@ -3,60 +3,6 @@ local redstone = require("component").redstone
 local event = require("event")
 local serialization = require("serialization")
 local rs = require("component").block_refinedstorage_interface
-local data
-
---[[
-
-
-
-
-
-
-broken dosent work
-
-
-
-
-
-
-
-
-need to fix before testing any other scripts
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-]]
 
 local infoChart = {}	-- name-items it controlls-signal-status-limit (string-table-table-table-table)
 local recieved = false
@@ -92,6 +38,8 @@ end
 local function physicleReset()
 	-- output on back of computer the signal
 	redstone.setOutput(2, 15)
+	os.sleep(1)
+	redstone.setOutput(2, 0)
 
 	for _, v in ipairs(infoChart) do
 		for i = 1, #v[4] do
