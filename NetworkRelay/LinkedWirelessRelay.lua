@@ -23,6 +23,7 @@ if conf then
 		end
 	end
 else
+	require("filesystem").makeDirectory("/etc/LinkedWirelessRelay/")
 	conf = io.open("/etc/LinkedWirelessRelay/LinkedWirelessRelay.cfg", "w")
 	conf:write("ignoreAddr={}\nports={300,280,250,245}\nprintMsg=true")
 	conf:close()

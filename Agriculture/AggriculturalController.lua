@@ -1,8 +1,9 @@
-local modem = require("component").modem
-local redstone = require("component").redstone
+local component = require("component")
+local modem = component.modem
+local redstone = component.redstone
 local event = require("event")
 local serialization = require("serialization")
-local rs = require("component").block_refinedstorage_interface
+local rs = component.refinedstorage_interface
 
 local infoChart = {}	-- name-items it controlls-signal-status-limit (string-table-table-table-table)
 local recieved = false
@@ -30,6 +31,7 @@ if conf then
 
 	conf:close()
 else
+	require("filesystem").makeDirectory("/etc/AggriculturalController/")
 	conf = io.open("/etc/AggriculturalController/AggriculturalController.cfg", "w")
 	conf:write("port=2025\ntimeOut=10\niterationLimit=15\ncheckInterval=15")
 	conf:close()

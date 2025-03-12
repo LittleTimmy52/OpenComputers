@@ -1,8 +1,9 @@
-local modem = require("component").modem
+local component = require("component")
+local modem = component.modem
 local event = require("event")
 local term = require("term")
 local serialization = require("serialization")
-local gpu = require("component").gpu
+local gpu = component.gpu
 
 local infoChart = {}	-- name:items it controlls:signal:status:limit (string:table:table:table:table)
 local stop = false
@@ -29,6 +30,7 @@ if conf then
 
 	conf:close()
 else
+	require("filesystem").makeDirectory("/etc/AggriculturalControllerInterface/")
 	conf = io.open("/etc/AggriculturalController/AggriculturalControllerInterface.cfg", "w")
 	conf:write("port=2025\ntimeOut=10\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234")	-- useData, password and port2 is for the remote rc but they use the same config
 	conf:close()

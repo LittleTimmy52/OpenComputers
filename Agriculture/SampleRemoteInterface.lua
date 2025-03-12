@@ -1,9 +1,10 @@
-local modem = require("component").modem
+local component = require("component")
+local modem = component.modem
 local event = require("event")
 local term = require("term")
 local serialization = require("serialization")
-local gpu = require("component").gpu
-local data = require("component").data
+local gpu = component.gpu
+local data = component.data
 
 local infoChart = {}	-- name:items it controlls:signal:status:limit (string:table:table:table:table)
 local stop = false

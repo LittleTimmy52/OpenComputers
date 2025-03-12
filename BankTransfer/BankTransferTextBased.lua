@@ -29,6 +29,7 @@ if conf then
 
 	conf:close()
 else
+	require("filesystem").makeDirectory("/etc/BankTransfer/")
 	conf = io.open("/etc/BankTransfer/BankTransfer.cfg", "w")
 	conf:write("uuidPath=/.uuids.txt\nadminPassword=123456789")
 	conf:close()

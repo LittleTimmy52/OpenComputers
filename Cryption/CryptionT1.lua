@@ -1,5 +1,4 @@
 local data = require("component").data
-local shell = require("shell")
 
 local tmpPath = "/tmp/.tmp.txt"
 

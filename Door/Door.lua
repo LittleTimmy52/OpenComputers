@@ -5,7 +5,6 @@ local modem = require("component").modem
 
 local arg = {...}
 
--- Default vlaues incase of no cfg
 local port = 808
 local doors = {"door1"}
 
@@ -28,7 +27,7 @@ local function loadValues()
 end
 
 local function openClose(oC, door)
-	-- Does the door exist?
+	-- does the door exist?
 	local function inTable(tab, element)
 		for _, v in pairs(tab) do
 			if v == element then
@@ -44,7 +43,6 @@ local function openClose(oC, door)
 		os.exit()
 	end
 
-	-- Tell microcontroller to open/close
 	if oC then
 		modem.broadcast(port, door .. " open")
 	else
@@ -53,14 +51,14 @@ local function openClose(oC, door)
 end
 
 local function config()
-	-- Make cfg if its nonexistant
+	-- make cfg if its nonexistant
 	if not fs.exists("/.door.cfg") then
 		print("Config file does not exist, making one now")
 		local file = io.open("/.door.cfg", "w")
 		file:write("port = 808\ndoors = {" .. '"' .. "door1" .. '"' .. "}")
 		file:close()
 	else
-		-- Options
+		-- options
 		print("What would you like to change?")
 		print("1: port\n2: doors\n3: view")
 		local ans = io.read()
@@ -90,7 +88,7 @@ local function config()
 			print("Note if you call the door some other name please make sure this is taken into account for in the microcontrollers code")
 			print("Current doors:")
 
-			-- List current table
+			-- list current table
 			local file = io.open("/.door.cfg", "r")
 			local fileContent = {}
 			for line in file:lines() do
@@ -101,7 +99,7 @@ local function config()
 
 			print(serialization.serialize(fileContent[2]))
 			local ans2 = io.read()
-			-- If the answer is not nil write
+			-- if the answer is not nil write
 			if ans2 then
 				file = io.open("/.door.cfg", "w")
 				file:write(fileContent[1] .. "\n" .. ans2)
@@ -111,7 +109,7 @@ local function config()
 				print("Doors needed")
 			end
 		elseif ans == "view" or ans == "3" then
-			-- List cfg
+			-- list cfg
 			local file = io.open("/.door.cfg", "r")
 			for line in file:lines() do
 				print(line)
@@ -129,7 +127,7 @@ end
 
 loadValues()
 
--- Selection
+-- selection
 if arg[1] == "open" and arg[2] ~= nil then
 	openClose(true, arg[2])
 elseif arg[1] == "close" and arg[2] ~= nil then

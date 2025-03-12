@@ -1,6 +1,5 @@
 local component = require("component")
 local data = component.data
-local shell = require("shell")
 
 local keyPath = "/.key.txt"
 local oldKeysPath = "/.oldKeys.txt"

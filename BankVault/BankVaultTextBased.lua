@@ -27,6 +27,7 @@ if conf then
 		end
 	end
 else
+	require("filesystem").makeDirectory("/etc/BankVault/")
 	conf = io.open("/etc/BankVault/BankVault.cfg", "w")
 	conf:write("adminPassword=123456789\ndataPath=/.data.txt\ndoorControllerUUIDs={}")
 	conf:close()
