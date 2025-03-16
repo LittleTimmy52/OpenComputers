@@ -2,7 +2,6 @@ local modem = require("component").modem
 local event = require("event")
 local serialization = require("serialization")
 local data = nil
-local fs = require("filesystem")
 
 local port = 2025
 local timeOut = 10
@@ -11,14 +10,14 @@ local useData = true
 local port2 = 1234
 local password = "SecurePresharedPassword"
 
-local function encrypt(decryptedData, password)
+local function encr(decryptedData, password)
 	local key = data.md5(password)
 	local iv = data.random(16)
 	local encryptedData = data.encrypt(decryptedData, key, iv)
 	return serialization.serialize({encrypted = encryptedData, iv = iv})
 end
 
-local function decrypt(encryptedData, password)
+local function decr(encryptedData, password)
 	local key = data.md5(password)
 	local decoded = serialization.unserialize(encryptedData)
 	return serialization.unserialize(data.decrypt(decoded.encrypted, key, decoded.iv))
@@ -37,7 +36,7 @@ local function getInfo()
 			recieved = true
 
 			if useData then
-				modem.broadcast(port2, encrypt(msg))
+				modem.broadcast(port2, encr(msg, password))
 			else
 				modem.broadcast(port2, msg)
 			end
@@ -57,7 +56,7 @@ local function getInfo()
 			-- stop once we get the final packet
 			if msg == string.find("info-") then
 				if useData then
-					modem.broadcast(port2, encrypt(msg))
+					modem.broadcast(port2, encr(msg, password))
 				else
 					modem.broadcast(port2, msg)
 				end
@@ -65,7 +64,7 @@ local function getInfo()
 				go = false
 			else
 				if useData then
-					modem.broadcast(port2, encrypt(msg))
+					modem.broadcast(port2, encr(msg, password))
 				else
 					modem.broadcast(port2, msg)
 				end
@@ -92,7 +91,7 @@ local function manToggle(index, signal)
 
 	if not recieved then
 		if useData then
-			modem.broadcast(port2, encrypt("Err"))
+			modem.broadcast(port2, encr("Err", password))
 		else
 			modem.broadcast(port2, "Err")
 		end
@@ -117,7 +116,7 @@ local function manReset()
 
 	if not recieved then
 		if useData then
-			modem.broadcast(port2, encrypt("Err"))
+			modem.broadcast(port2, encr("Err", password))
 		else
 			modem.broadcast(port2, "Err")
 		end
@@ -142,7 +141,7 @@ local function manUpdate()
 
 	if not recieved then
 		if useData then
-			modem.broadcast(port2, encrypt("Err"))
+			modem.broadcast(port2, encr("Err", password))
 		else
 			modem.broadcast(port2, "Err")
 		end
@@ -151,7 +150,7 @@ end
 
 local function messageHandler(_, _, _, p, _, message)
 	if useData and p == port2 then
-		message = decrypt(message)
+		message = decr(message, password)
 	end
 
 	if p == p2 then
@@ -205,12 +204,13 @@ function start()
 			elseif k == "password" then
 				password = v
 			elseif k == "port2" then
-				password = tonumber(v)
+				port2 = tonumber(v)
 			end
 		end
 
 		conf:close()
 	else
+		require("filesystem").makeDirectory("/etc/AggriculturalController/")
 		conf = io.open("/etc/AggriculturalController/AggriculturalControllerInterface.cfg", "w")
 		conf:write("port=2025\ntimeOut=10\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234")
 		conf:close()

@@ -27,15 +27,15 @@ end
 
 local function messageHandler(message, from)
 	if message == "rolecall" then
-		modem.send(from, port, "rolecal-" .. name .. "-" .. itemsControlled)
+		modem.send(from, port, "rolecall-" .. name .. "-" .. itemsControlled)
 	elseif string.find(message, name .. "-toggle") then
 		local signal = tonumber(string.match(message, ".*-(.*)"))
 		redstone.setOutput(2, signal)
 		sleep(1)
 		redstone.setOutput(2, 0)
-	end
 
-	modem.send(from, port, "Acknowlaged")
+		modem.send(from, port, "Acknowlaged")
+	end
 end
 
 while true do
