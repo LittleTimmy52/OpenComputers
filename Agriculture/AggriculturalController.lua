@@ -201,6 +201,8 @@ local function messageHandler(_, _, from, _, _, message)
 	end
 end
 
+local check
+
 local success, _ = pcall(function()
 	event.listen("modem_message", messageHandler)
 
@@ -209,7 +211,7 @@ local success, _ = pcall(function()
 	modem.broadcast(port, "rolecall")
 	physicleReset()
 
-	thread.create(function() while true do checkStorage() os.sleep(checkInterval) end end)
+	check = thread.create(function() while true do checkStorage() os.sleep(checkInterval) end end)
 
 	-- "Ahh, Ahh, Ahh, Ahh, stayin alive, stayin alive"
 	while true do
@@ -218,6 +220,7 @@ local success, _ = pcall(function()
 end)
 
 if not success then
+	check:kill()
 	event.ignore("modem_message", messageHandler)
 	modem.close(port)
 	physicleReset()
