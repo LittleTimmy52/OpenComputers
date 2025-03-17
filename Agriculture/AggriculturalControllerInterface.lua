@@ -56,6 +56,7 @@ while not stop do
 			term.clear()
 			local iteration = 0
 			local recieved = false
+			local infoChart
 
 			-- loop to get the chart lest it fails then you get a message
 			while not recieved and iteration < iterationLimit do
@@ -85,7 +86,7 @@ while not stop do
 					if msg == string.find(msg, "info-") then
 						go = false
 						-- if we got all packets stich it all together
-						if #msg == string.match(msg, "([^-]+)")[2] then
+						if #packets == string.match(msg, "([^-]+)")[2] then
 							local preData = ""
 							for _,v in ipairs(packets) do
 								preData = preData .. v
@@ -107,7 +108,7 @@ while not stop do
 				local lines = 1
 				for k, v in ipairs(tab) do
 					local line = k .. ": " .. v
-					local linesNeeded = string.len(line) / width
+					local linesNeeded = math.ceil(string.len(line) / width)
 					local linesLeft = (height - lines) - 1
 
 					if linesLeft > linesNeeded then
@@ -247,13 +248,14 @@ while not stop do
 		end
 
 		local function manToggle()
-			local index = nil
 			local signal = nil
+			local name = nil
+		
 			repeat
 				term.clear()
-				print("Enter microcontroller index (in option 1 of \"Get information\")")
-				index = tonumber(io.read())
-			until index ~= nil and index > 0 and index < #infoChart + 1
+				print("Enter microcontroller name")
+				name = io.read()
+			until name ~= nil
 
 			repeat
 				term.clear()
@@ -266,7 +268,7 @@ while not stop do
 
 			-- loop to get the reply lest it fails then you get a message
 			while not recieved and iteration < iterationLimit do
-				modem.broadcast(port, "manualToggle-" .. infoChart[index][1] .. tostring(signal))
+				modem.broadcast(port, "manualToggle-" .. name .. tostring(signal))
 				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
 
 				if msg == "toggled" then
@@ -362,8 +364,6 @@ while not stop do
 				"Takes you back to the main menu."
 			}
 
-			print("Help:")
-
 			local lines = 0
 
 			for _, v in ipairs(helpList) do
@@ -371,14 +371,13 @@ while not stop do
 				local linesLeft = height - lines - 2 -- Reserve 2 lines for "Press any key"
 
 				if linesNeeded > linesLeft then
-					print("\nPress any key to continue...")
+					print("\nPress any key to continue")
 					while true do
 						local _, _, _, pn = event.pull("key_down")
 						if pn then break end
 						os.sleep(0)
 					end
 					term.clear()
-					print("Help:")
 					lines = 0
 				end
 
