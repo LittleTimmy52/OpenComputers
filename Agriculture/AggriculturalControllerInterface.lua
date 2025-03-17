@@ -30,7 +30,7 @@ if conf then
 
 	conf:close()
 else
-	require("filesystem").makeDirectory("/etc/AggriculturalControllerInterface/")
+	require("filesystem").makeDirectory("/etc/AggriculturalController/")
 	conf = io.open("/etc/AggriculturalController/AggriculturalControllerInterface.cfg", "w")
 	conf:write("port=2025\ntimeOut=10\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234")	-- useData, password and port2 is for the remote rc but they use the same config
 	conf:close()
@@ -54,7 +54,7 @@ while not stop do
 
 		local function getInfo()
 			term.clear()
-			local iteration = -1
+			local iteration = 0
 			local recieved = false
 
 			-- loop to get the chart lest it fails then you get a message
@@ -82,10 +82,10 @@ while not stop do
 					break
 				else
 					-- stop once we get the final packet
-					if msg == string.find("info-") then
+					if msg == string.find(msg, "info-") then
 						go = false
 						-- if we got all packets stich it all together
-						if #packet == string.match(msg, "([^-]+)")[2] then
+						if #msg == string.match(msg, "([^-]+)")[2] then
 							local preData = ""
 							for _,v in ipairs(packets) do
 								preData = preData .. v
@@ -261,7 +261,7 @@ while not stop do
 				signal = tonumber(io.read())
 			until signal ~= nil and signal > 0 and signal < 16
 
-			local iteration = -1
+			local iteration = 0
 			local recieved = false
 
 			-- loop to get the reply lest it fails then you get a message
@@ -283,7 +283,7 @@ while not stop do
 		end
 
 		local function manReset()
-			local iteration = -1
+			local iteration = 0
 			local recieved = false
 
 			-- loop to get the reply lest it fails then you get a message
@@ -305,7 +305,7 @@ while not stop do
 		end
 
 		local function manUpdate()
-			local iteration = -1
+			local iteration = 0
 			local recieved = false
 
 			-- loop to get the reply lest it fails then you get a message
@@ -332,8 +332,7 @@ while not stop do
 				"[1] Get information:",
 				"Takes you to a sub menu to provide you the specified information.",
 				"[2] Manual toggle:",
-				"Askes you for the index of the microcontroller and the signal stregnth of the desired output and tells that microcontroller to send that",
-				"redstone signal stregnth to toggle the item assigned to that signal.",
+				"Askes you for the index of the microcontroller and the signal stregnth of the desired output and tells that microcontroller to send that redstone signal stregnth to toggle the item assigned to that signal.",
 				"\"[1] Microcontroller names\" of \"[1] Get information\" provides the index.",
 				"[3] Manual reset:",
 				"Pulses a redstone signal to the back of the host which should be wired up in a way such that it turnns everything off",
@@ -364,41 +363,33 @@ while not stop do
 			}
 
 			print("Help:")
-			local lines = 1
-			for k, v in ipairs(helpList) do
-				local line = k .. ": " .. v
-				local linesNeeded = string.len(line) / width
-				local linesLeft = (height - lines) - 1
 
-				if linesLeft > linesNeeded then
-					print(line)
-					lines = lines + linesNeeded
-				else
-					print("Press any to continue")
-					local continue = true
-					while continue do
-						local _, _, _, pn = event.pull("key_down", timeOut)
-						if pn ~= nil then
-							continue = false
-						end
+			local lines = 0
 
+			for _, v in ipairs(helpList) do
+				local linesNeeded = math.ceil(#v / width)
+				local linesLeft = height - lines - 2 -- Reserve 2 lines for "Press any key"
+
+				if linesNeeded > linesLeft then
+					print("\nPress any key to continue...")
+					while true do
+						local _, _, _, pn = event.pull("key_down")
+						if pn then break end
 						os.sleep(0)
 					end
-
 					term.clear()
-					print(line)
-					lines = 1
+					print("Help:")
+					lines = 0
 				end
+
+				print(v)
+				lines = lines + linesNeeded
 			end
 
-			print("Press any to continue")
-			local continue = true
-			while continue do
-				local _, _, _, pn = event.pull("key_down", timeOut)
-				if pn ~= nil then
-					continue = false
-				end
-
+			print("\nPress any key to return to the menu...")
+			while true do
+				local _, _, _, pn = event.pull("key_down")
+				if pn then break end
 				os.sleep(0)
 			end
 		end
@@ -423,6 +414,7 @@ while not stop do
 			elseif choice == 6 then
 				term.clear()
 				stop = true
+				run = false
 			end
 		end
 
@@ -433,8 +425,10 @@ while not stop do
 			end
 
 			-- for restarting purposes
-			run = true
-			start()
+			if not stop then
+				run = true
+				start()
+			end
 		end
 
 		start()

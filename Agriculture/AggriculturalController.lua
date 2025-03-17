@@ -8,6 +8,7 @@ local thread = require("thread")
 
 local infoChart = {}	-- name-items it controlls-signal-status-limit-from (string-table-table-table-table-string)
 local recieved = false
+local check
 
 local port = 2025
 local timeOut = 10
@@ -196,12 +197,12 @@ local function messageHandler(_, _, from, _, _, message)
 		toggle(parts[2], parts[3])
 		modem.send(from, port, "toggled")
 	elseif message == "manualUpdate" then
+		check:suspend()
 		checkStorage()
+		check:resume()
 		modem.send(from, port, "updated")
 	end
 end
-
-local check
 
 local success, _ = pcall(function()
 	event.listen("modem_message", messageHandler)
