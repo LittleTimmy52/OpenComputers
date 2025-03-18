@@ -1,4 +1,8 @@
 # Aggriculture
+
+## Special note
+I am currently working onthe interface stuff, as of now im just making a whole new set of intercace stuff ill clean things up later
+
 ## Purpose
 The programs here are for controlling aggriculture output based on the ammounts in a refined storage
 inventory system. It is intended to be a wired connection to keep the system secure as with wireless
@@ -26,6 +30,8 @@ logic, it looks at the refined storage inventory and automatically turns on and 
 in based on the given data from the microcontrollers rolecall, this is why it is imperitive to set up
 the controllers perfectly or issues may arise. This is designed to be wired into the microcontrollers
 and the back connected via redstone to the toggle mechanism to reset everything physically.
+
+Note: Any change made microcontroller wise warrents this program to be closed and restarted.
 
 ### AggriculturalControllerInterface
 This is an interface program for the controller as the name suggests, it is meant to run on either a

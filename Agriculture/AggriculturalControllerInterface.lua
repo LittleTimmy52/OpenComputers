@@ -4,15 +4,20 @@ local event = require("event")
 local term = require("term")
 local serialization = require("serialization")
 local gpu = component.gpu
+local data = nil
 
-local infoChart = {}	-- name:items it controlls:signal:status:limit (string:table:table:table:table)
+local timerID
+local recieved = false
 local stop = false
-local run = true
 local width, height = gpu.getResolution()
 
 local port = 2025
 local timeOut = 10
 local iterationLimit = 15
+local useData = true
+local password = "SecurePresharedPassword"
+local port2 = 1234
+local controllerAddress = "network card address here"
 
 -- load conf
 local conf = io.open("/etc/AggriculturalController/AggriculturalControllerInterface.cfg", "r")
@@ -25,6 +30,14 @@ if conf then
 			timeOut = tonumber(v)
 		elseif k == "iterationLimit" then
 			iterationLimit = tonumber(v)
+		elseif k == "useData" then
+			useData = (v == "true")
+		elseif k == "password" then
+			password = v
+		elseif k == "port2" then
+			port2 = tonumber(v)
+		elseif k == "controllerAddress" then
+			controllerAddress = v
 		end
 	end
 
@@ -32,406 +45,231 @@ if conf then
 else
 	require("filesystem").makeDirectory("/etc/AggriculturalController/")
 	conf = io.open("/etc/AggriculturalController/AggriculturalControllerInterface.cfg", "w")
-	conf:write("port=2025\ntimeOut=10\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234")	-- useData, password and port2 is for the remote rc but they use the same config
+	conf:write("port=2025\ntimeOut=10\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234")
 	conf:close()
 end
 
-modem.open(port)
+if useData then
+	data = component.data
+end
 
-while not stop do
-	local status = pcall(function()
-		-- menues
-		local function mainMenu()
-			term.clear()
-			print("Main menu:")
-			print("[1] Get information")
-			print("[2] Manual toggle")
-			print("[3] Manual reset")
-			print("[4] Manual update")
-			print("[5] Help")
-			print("[6] Exit program")
+local function encr(decryptedData, password)
+	local key = data.md5(password)
+	local iv = data.random(16)
+	local encryptedData = data.encrypt(decryptedData, key, iv)
+	return serialization.serialize({encrypted = encryptedData, iv = iv})
+end
+
+local function decr(encryptedData, password)
+	local key = data.md5(password)
+	local decoded = serialization.unserialize(encryptedData)
+	return serialization.unserialize(data.decrypt(decoded.encrypted, key, decoded.iv))
+end
+
+local function out(data, address)
+	if address ~= nil then
+		if useData then
+			modem.send(address, port2, encr(data))
+		else
+			modem.send(address, port2, data)
 		end
+	else
+		print(data)
+	end
+end
 
-		local function getInfo()
-			term.clear()
-			local iteration = 0
-			local recieved = false
-			local infoChart
+local function getInfo(address, option)
 
-			-- loop to get the chart lest it fails then you get a message
-			while not recieved and iteration < iterationLimit do
-				modem.broadcast(port, "getInfo")
-				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
+end
 
-				if msg == "info" then
-					recieved = true
-				end
+local function manToggle(address, name, signal)
+	recieved = false
 
-				iteration = iteration + 1
+	timerID = event.timer(timeOut, function()
+		modem.broadcast(port, "toggle-" .. name .. "-" .. tostring(signal))
+	end, iterationLimit)
+
+	if not recieved then
+		out("Could not reach the controller server (timed out, limit reached)", address)
+		os.sleep(5)
+	end
+end
+
+local function manUpdate(address)
+	recieved = false
+
+	timerID = event.timer(timeOut, function()
+		modem.broadcast(port, "update")
+	end, iterationLimit)
+	
+	if not recieved then
+		out("Could not reach the controller server (timed out, limit reached)", address)
+		os.sleep(5)
+	end
+end
+
+local function manReset(address)
+	recieved = false
+
+	timerID = event.timer(timeOut, function()
+		modem.broadcast(port, "reset")
+	end, iterationLimit)
+	
+	if not recieved then
+		out("Could not reach the controller server (timed out, limit reached)", address)
+		os.sleep(5)
+	end
+end
+
+local function messageHandler(_, _, from, portFrom, _, message)
+	if portFrom == port then
+		if message == "executed" then
+			event.cancel(timerID)
+			recieved = true
+		elseif message == "info" then
+
+		elseif message:sub(1, 5) == "info-" then
+
+		elseif message:sub(1, 5) == "done-" then
+			
+		end
+	elseif portFrom == port2 then		
+		if message:sub(1, 7) == "getInfo" then
+			getInfo(from, message:sub(9))
+		elseif message:sub(1, 9) == "manToggle" then
+			local parts = {}
+			for part in string.gmatch(message, "([^-]+)") do
+				table.insert(parts, part)
 			end
 
-			local go = recieved
-			local packetErr = false
-			local packets = {}
+			manToggle(from, parts[2], parts[3])
+		elseif message == "manUpdate" then
+			manUpdate(from)
+		elseif message == "manReset" then
+			manReset(from)
+		elseif message == "role" then
+			modem.broadcast(port, "role")
+		end
+	end
+end
 
-			-- if it was recieved, now we wait for the packets
-			while go do
-				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
-				if msg == nil then
-					recieved = false
-					packetErr = true
-					break
-				else
-					-- stop once we get the final packet
-					if msg == string.find(msg, "info-") then
-						go = false
-						-- if we got all packets stich it all together
-						if #packets == string.match(msg, "([^-]+)")[2] then
-							local preData = ""
-							for _,v in ipairs(packets) do
-								preData = preData .. v
-							end
+local function exit()
+	event.ignore("modem_message", messageHandler)
+	stop = true
+end
 
-							infoChart = serialization.unserialize(preData)
-						else
-							recieved = false
-							packetErr = true
-						end
-					else
-						table.insert(packets, msg)
-					end
-				end
+local function UI()
+	local mainMenu = {
+		"Main Menu:",
+		"[1] Get information",
+		"[2] Manual toggle",
+		"[3] Manual reset",
+		"[4] Manual update",
+		"[5] Help",
+		"[6] Exit program"
+	}
+
+	local dataMenu = {
+		"Information:",
+		"[1] Update stored data",
+		"[2] Microcontroller names",
+		"[3] Items controlled",
+		"[4] Signal assignments",
+		"[5] Status",
+		"[6] Limits",
+		"[7] Addresses",
+		"[8] Main menu"
+	}
+
+	local helpMenu = {
+		"Help:",
+		"This is the interface for \"AggriculturalController,\" this program just tells the controller what to do because the controller is fully automated and can only be interacted this way over the network.",
+		"Main Menu:",
+		"[1] Get information",
+		"Takes you to a sub menu to find out specific information the controller has at its disposal.",
+		"Note: This aids in \"[2] Manual toggle\" because you need the microcontroller name and the signal you wish to toggle.",
+		"[2] Manual toggle",
+		"This asks you for which microcontroller, by name (see: \"[1] Get infoormation\" to find that out), that the specific item you wish to toggle is attached to, and the signal assigned to said item to then tell the controller to toggle it.",
+		"[3] Manual reset",
+		"This tells the controller to physically reset all redstone decoder flip flops.",
+		"[4] Manual update",
+		"This tells the controller to run its update scan.",
+		"Note: The controller automatically runs its update scan, but this is here if you want to run it for your self.",
+		"[5] Help",
+		"Shows this very insightful menu.",
+		"[6] Exit program",
+		"Need I explain this one? Well if its not objious it closes the program.",
+		"Information:",
+		"[1] Update stored data",
+		"The information from the server is only updated when this is called or if its nil when selecting one fo the other options. Therefore you MUST select this option for more accurate information.",
+		"Note: This is dont this way because caching the information will cut the time for subsequent lookups down significantly.",
+		"[2] Microcontroller names",
+		"This lists the names of all microcontrollers the controller controls.",
+		"Note: \"[2] Manual toggle\" on the main menu needs this along with the signal for the desired item (see \"[4] Signal assignments\").",
+		"[3] Items controlled",
+		"This lists the item names in standard mod:item format the controller monitors per a specified microcontroller.",
+		"[4] Signal assignments",
+		"This lists the various signals that are assigned per a specified microcontroller.",
+		"Note: \"[2] Manual toggle\" on the main menu needs this along with the name for the desired item (see \"[2] Microcontroller names\").",
+		"[5] Status",
+		"This lists the status of the various monitered items per a specific microcontroller.",
+		"[6] Limits",
+		"This lists the various limits of the various items per a specific microcontroller.",
+		"[7] Addresses",
+		"This lists the various addresses of the microcontrollers network cards.",
+		"[8] Main menu",
+		"Need I explain this? well, it takes you back to the main menu.",
+		"Special note in regards to the information pages:",
+		"For options 3-6, an index wil be displayed next to the values, this is for tracking the information as a set. Essentially say there is an item being tracked, minecraft:potato for instance, its the first item so its index is 1, in the other pages, anything with and index of 1 belongs to minecraft:potato, thus you can line up information."
+	}
+
+	local function printMenu(menu)
+		term.clear()
+		for i = 1, #menu do
+			print(menu[1])
+		end
+	end
+
+	local function fittedPrint(tableToPrint, addIndex)
+		term.clear()
+		local lines = 0
+
+		for k, v in ipairs(tableToPrint) do
+			if addIndex then
+				v = k .. ": " .. v
 			end
 
-			local function printTableWithPages(tab, first)
-				print(first)
-				local lines = 1
-				for k, v in ipairs(tab) do
-					local line = k .. ": " .. v
-					local linesNeeded = math.ceil(string.len(line) / width)
-					local linesLeft = (height - lines) - 1
+			local linesNeeded = math.ceil(#v / width)
+			local linesLeft = height - lines - 2 -- Reserve 2 lines for "Press any key"
 
-					if linesLeft > linesNeeded then
-						print(line)
-						lines = lines + linesNeeded
-					else
-						print("Press any to continue")
-						local continue = true
-						while continue do
-							local _, _, _, pn = event.pull("key_down", timeOut)
-							if pn ~= nil then
-								continue = false
-							end
-
-							os.sleep(0)
-						end
-
-						term.clear()
-						print(line)
-						lines = 1
-					end
-				end
-
-				print("Press any to continue")
-				local continue = true
-				while continue do
-					local _, _, _, pn = event.pull("key_down", timeOut)
-					if pn ~= nil then
-						continue = false
-					end
-
+			if linesNeeded > linesLeft then
+				print("\nPress any key to continue")
+				while true do
+					local _, _, _, pn = event.pull("key_down")
+					if pn then break end
 					os.sleep(0)
 				end
-			end
-
-			if recieved then
-				local choice
-				repeat
-					term.clear()
-					print("Information:")
-					print("[1] Microcontroller names")
-					print("[2] Items controlled")
-					print("[3] Signal assignments")
-					print("[4] Status")
-					print("[5] Limit")
-					print("[6] Main menu")
-					choice = tonumber(io.read())
-				until choice ~= nil and choice > 0 and choice < 7
-
 				term.clear()
-
-				if choice == 1 then
-					print("Names:")
-					local lines = 1
-					for k, v in ipairs(infoChart) do
-						local line = k .. ": " .. v[1]
-						local linesNeeded = string.len(line) / width
-						local linesLeft = (height - lines) - 1
-
-						if linesLeft > linesNeeded then
-							print(line)
-							lines = lines + linesNeeded
-						else
-							print("Press any to continue")
-							local continue = true
-							while continue do
-								local _, _, _, pn = event.pull("key_down", timeOut)
-								if pn ~= nil then
-									continue = false
-								end
-
-								os.sleep(0)
-							end
-
-							term.clear()
-							print(line)
-							lines = 1
-						end
-					end
-
-					print("Press any to continue")
-					local continue = true
-					while continue do
-						local _, _, _, pn = event.pull("key_down", timeOut)
-						if pn ~= nil then
-							continue = false
-						end
-
-						os.sleep(0)
-					end
-				elseif choice == 2 then
-					local index = nil
-					repeat
-						term.clear()
-						print("Enter microcontroller index (in option 1)")
-						index = tonumber(io.read())
-					until index ~= nil and index > 0 and index < #infoChart + 1
-					
-					printTableWithPages(infoChart[index][2], "Items:")
-				elseif choice == 3 then
-					local index = nil
-					repeat
-						term.clear()
-						print("Enter microcontroller index (in option 1)")
-						index = tonumber(io.read())
-					until index ~= nil and index > 0 and index < #infoChart + 1
-				
-					printTableWithPages(infoChart[index][3], "Signal:")
-				elseif choice == 4 then
-					local index = nil
-					repeat
-						term.clear()
-						print("Enter microcontroller index (in option 1)")
-						index = tonumber(io.read())
-					until index ~= nil and index > 0 and index < #infoChart + 1
-				
-					printTableWithPages(infoChart[index][4], "Status:")
-				elseif choice == 5 then
-					local index = nil
-					repeat
-						term.clear()
-						print("Enter microcontroller index (in option 1)")
-						index = tonumber(io.read())
-					until index ~= nil and index > 0 and index < #infoChart + 1
-				
-					printTableWithPages(infoChart[index][5], "Limit:")
-				end
-			else
-				if packetErr then
-					print("Packets were not recieved properly, please check all connections.")
-					os.sleep(5)
-				else
-					print("Could not reach the controller server (timed out, limit reached).")
-					os.sleep(5)
-				end
+				lines = 0
 			end
+
+			print(v)
+			lines = lines + linesNeeded
 		end
 
-		local function manToggle()
-			local signal = nil
-			local name = nil
-		
-			repeat
-				term.clear()
-				print("Enter microcontroller name")
-				name = io.read()
-			until name ~= nil
-
-			repeat
-				term.clear()
-				print("Enter the signal value (1-15)")
-				signal = tonumber(io.read())
-			until signal ~= nil and signal > 0 and signal < 16
-
-			local iteration = 0
-			local recieved = false
-
-			-- loop to get the reply lest it fails then you get a message
-			while not recieved and iteration < iterationLimit do
-				modem.broadcast(port, "manualToggle-" .. name .. tostring(signal))
-				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
-
-				if msg == "toggled" then
-					recieved = true
-				end
-
-				iteration = iteration + 1
-			end
-
-			if not recieved then
-				print("Could not reach the controller server (timed out, limit reached)")
-				os.sleep(5)
-			end
+		print("\nPress any key to return to the menu...")
+		while true do
+			local _, _, _, pn = event.pull("key_down")
+			if pn then break end
+			
+			os.sleep(0)
 		end
+	end
+end
 
-		local function manReset()
-			local iteration = 0
-			local recieved = false
+event.listen("modem_message", messageHandler)
 
-			-- loop to get the reply lest it fails then you get a message
-			while not recieved and iteration < iterationLimit do
-				modem.broadcast(port, "reset")
-				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
-
-				if msg == "reset" then
-					recieved = true
-				end
-
-				iteration = iteration + 1
-			end
-
-			if not recieved then
-				print("Could not reach the controller server (timed out, limit reached)")
-				os.sleep(5)
-			end
-		end
-
-		local function manUpdate()
-			local iteration = 0
-			local recieved = false
-
-			-- loop to get the reply lest it fails then you get a message
-			while not recieved and iteration < iterationLimit do
-				modem.broadcast(port, "update")
-				local _, _, _, _, _, msg = event.pull("modem_message", timeOut)
-
-				if msg == "updated" then
-					recieved = true
-				end
-
-				iteration = iteration + 1
-			end
-
-			if not recieved then
-				print("Could not reach the controller server (timed out, limit reached)")
-				os.sleep(5)
-			end
-		end
-
-		local function help()
-			local helpList = {
-				"Main menu:",
-				"[1] Get information:",
-				"Takes you to a sub menu to provide you the specified information.",
-				"[2] Manual toggle:",
-				"Askes you for the index of the microcontroller and the signal stregnth of the desired output and tells that microcontroller to send that redstone signal stregnth to toggle the item assigned to that signal.",
-				"\"[1] Microcontroller names\" of \"[1] Get information\" provides the index.",
-				"[3] Manual reset:",
-				"Pulses a redstone signal to the back of the host which should be wired up in a way such that it turnns everything off",
-				"[4] Manual update:",
-				"Tells the server to update its item list.",
-				"[5] Help:",
-				"Takes you to this very page.",
-				"[6] Exit program:",
-				"Closes the program so you can do whatever you need to do on the device this is on.",
-				"Information:",
-				"[1] Microcontroller names:",
-				"Takes you through a list of names with the index (This is what was refered to when askinbg for index).",
-				"[2] Items controlled:",
-				"Askes for the index of the microcontroller you wish to view and lists the different item oreDict names with their index.",
-				"Note that this index is so you know what is assigned to what. For instance at index 1 is minecraft:dirt, in the other menu options say",
-				"\"[3] Signal assignments\" at index 1 is signal stregnth 1, therefore minecraft:dirt was assigned a signal of 1.",
-				"[3] Signal assignments:",
-				"Askes for the index of the microcontroller you wish to view and lists the different signal assignments with their index.",
-				"Note that the reason for the index is the same as \"[2] Items controlled\".",
-				"[4] Status:",
-				"Askes for the index of the microcontroller you wish to view and lists the different item statuses with their index.",
-				"Note that the reason for the index is the same as \"[2] Items controlled\".",
-				"[5] Limit:",
-				"Askes for the index of the microcontroller you wish to view and lists the different item limits with their index.",
-				"Note that the reason for the index is the same as \"[2] Items controlled\".",
-				"[6] Main menu:",
-				"Takes you back to the main menu."
-			}
-
-			local lines = 0
-
-			for _, v in ipairs(helpList) do
-				local linesNeeded = math.ceil(#v / width)
-				local linesLeft = height - lines - 2 -- Reserve 2 lines for "Press any key"
-
-				if linesNeeded > linesLeft then
-					print("\nPress any key to continue")
-					while true do
-						local _, _, _, pn = event.pull("key_down")
-						if pn then break end
-						os.sleep(0)
-					end
-					term.clear()
-					lines = 0
-				end
-
-				print(v)
-				lines = lines + linesNeeded
-			end
-
-			print("\nPress any key to return to the menu...")
-			while true do
-				local _, _, _, pn = event.pull("key_down")
-				if pn then break end
-				os.sleep(0)
-			end
-		end
-
-		local function main()
-			local choice
-			repeat
-				mainMenu()
-				choice = tonumber(io.read())
-			until choice ~= nil and choice > 0 and choice < 7
-
-			if choice == 1 then
-				getInfo()
-			elseif choice == 2 then
-				manToggle()
-			elseif choice == 3 then
-				manReset()
-			elseif choice == 4 then
-				manUpdate()
-			elseif choice == 5 then
-				help()
-			elseif choice == 6 then
-				term.clear()
-				stop = true
-				run = false
-			end
-		end
-
-		local function start()
-			while run do
-				main()
-				os.sleep(0)
-			end
-
-			-- for restarting purposes
-			if not stop then
-				run = true
-				start()
-			end
-		end
-
-		start()
-	end)
-
-	if not status then os.sleep(0) end
+while not stop do
+	pcall(UI)
+	os.sleep(0)
 end

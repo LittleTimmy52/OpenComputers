@@ -6,7 +6,7 @@ local serialization = require("serialization")
 local rs = component.refinedstorage_interface
 local thread = require("thread")
 
-local infoChart = {}	-- name-items it controlls-signal-status-limit-from (string-table-table-table-table-string)
+local infoChart = {}	-- name-items it controlls-signal-status-limit-address (string-table-table-table-table-string)
 local recieved = false
 local check
 
@@ -162,7 +162,7 @@ local function messageHandler(_, _, from, _, _, message)
 		recieved = true
 	elseif message == "reset" then
 		physicleReset()
-		modem.send(from, port, "reset")
+		modem.send(from, port, "executed")
 	elseif message == "getInfo" then
 		local preData = serialization.serialize(infoChart)
 		local tmp = ""
@@ -188,19 +188,19 @@ local function messageHandler(_, _, from, _, _, message)
 
 		-- tell sender were done
 		modem.send(from, port, "done-" .. tostring(packets))
-	elseif string.find(message, "manualToggle-") then
+	elseif message:sub(1, 7) == "toggle-" then
 		local parts = {}
 		for part in string.gmatch(message, "([^-]+)") do
 			table.insert(parts, part)
 		end
 
 		toggle(parts[2], parts[3])
-		modem.send(from, port, "toggled")
-	elseif message == "manualUpdate" then
+		modem.send(from, port, "executed")
+	elseif message == "update" then
 		check:suspend()
 		checkStorage()
 		check:resume()
-		modem.send(from, port, "updated")
+		modem.send(from, port, "executed")
 	end
 end
 
