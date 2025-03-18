@@ -164,30 +164,28 @@ local function messageHandler(_, _, from, _, _, message)
 		physicleReset()
 		modem.send(from, port, "executed")
 	elseif message == "getInfo" then
-		local preData = serialization.serialize(infoChart)
-		local tmp = ""
+		local serializedData = serialization.serialize(dataTable)
+		local maxSize = modem.maxPacketSize() - 10  -- leave room for prefixes
+		local chunks = {}
 		local packets = 0
 
-		-- give the sender the dtarting flag and then the chunks there after
-		modem.send(from, port, "info")
-		for i = 1, #preData do
-			if string.len(tmp) < modem.maxPacketSize() - 7 then
-				tmp = tmp .. string.sub(preData, i, i)
-			else
-				modem.send(from, port, "info-" .. tmp)
-				tmp = ""
-				packets = packets + 1
-			end
-		end
-
-		-- send the last packet
-		if tmp ~= "" then
-			modem.send(from, port, tmp)
+		-- split serialized data into chunks
+		for i = 1, #serializedData, maxSize do
+			table.insert(chunks, serializedData:sub(i, i + maxSize - 1))
 			packets = packets + 1
 		end
 
-		-- tell sender were done
-		modem.send(from, port, "done-" .. tostring(packets))
+		-- send data about the transmission
+		modem.send(address, port, "start-" .. tostring(packets))
+
+		-- send each chunk with an index
+		for i, chunk in ipairs(chunks) do
+			modem.send(address, port, "chunk-" .. tostring(i) .. "-" .. chunk)
+			os.sleep(0.05)
+		end
+
+		-- send completion
+		modem.send(address, port, "done-" .. tostring(packets))
 	elseif message:sub(1, 7) == "toggle-" then
 		local parts = {}
 		for part in string.gmatch(message, "([^-]+)") do

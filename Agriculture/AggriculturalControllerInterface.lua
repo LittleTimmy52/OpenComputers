@@ -6,10 +6,16 @@ local serialization = require("serialization")
 local gpu = component.gpu
 local data = nil
 
+local infoChart = {}	-- name-items it controlls-signal-status-limit-address (string-table-table-table-table-string)
 local timerID
 local recieved = false
+local temp = ""
+local chunksRecieved = {}
+local expected
 local stop = false
 local width, height = gpu.getResolution()
+local calledFromRemote = false
+local tmpAddr
 
 local port = 2025
 local timeOut = 10
@@ -78,15 +84,197 @@ local function out(data, address)
 	end
 end
 
-local function getInfo(address, option)
+local function fittedPrint(tableToPrint, addIndex)
+	term.clear()
+	local lines = 0
 
+	for k, v in ipairs(tableToPrint) do
+		if addIndex then
+			v = k .. ": " .. v
+		end
+
+		-- Break the line into multiple chunks if it's too long
+		while #v > width do
+			local chunk = v:sub(1, width)  -- take the first 'width' characters
+			v = v:sub(width + 1)           -- remove the printed part
+			print(chunk)
+			lines = lines + 1
+
+			if lines >= height - 2 then  -- reserve 2 lines for the "Press any key"
+				print("\nPress any key to continue...")
+				event.pull("key_down")
+				term.clear()
+				lines = 0
+			end
+		end
+
+		print(v)
+		lines = lines + 1
+
+		if lines >= height - 2 then
+			print("\nPress any key to continue...")
+			event.pull("key_down")
+			term.clear()
+			lines = 0
+		end
+	end
+
+	print("\nPress any key to return to the menu...")
+	event.pull("key_down")
 end
 
-local function manToggle(address, name, signal)
+local function getInfo(option, address)
+	local function recieve(address)
+		infoChart = {}
+		temp = ""
+
+		timerID = event.timer(timeOut, function()
+			os.sleep(timeOut)
+		end, iterationLimit)
+		
+		if temp:sub(1, 6) == "start-" then
+			if address ~= nil then
+				modem.send(address, port2, temp)
+				calledFromRemote = true
+				tmpAddr = address
+			else
+				expected = tonumber(temp:sub(7))
+				timerID = event.timer(timeOut, function()
+					os.sleep(timeOut)
+				end, math.huge)
+
+				if temp:sub(1, 5) == "done-" then
+					if address ~= nil then
+						modem.send(address, port2, temp)
+						calledFromRemote = false
+					else
+						local receivedCount = tonumber(msg:match("^done%-(%d+)$"))
+
+						if receivedCount == expected and #chunksRecieved == expected then
+							local full = table.concat(chunksRecieved)
+							infoChart = serialization.unserialize(full)
+						else
+							print("Packet loss.")
+						end
+					end
+				end
+			end
+		else
+			out("Could not reach the controller server (timed out, limit reached)", address)
+			os.sleep(5)
+		end
+	end
+
+	if address == nil then
+		if option == 1 then
+			print("Please wait whilst we recieve the chart.")
+			recieve(nil)
+			print("recieved")
+			os.sleep(5)
+		elseif option == 2 then
+			if infoChart == {} then recieve(nil) end
+
+			for i = 1, #infoChart do
+				print(infoChart[i][1], address)
+			end
+		elseif option == 3 then
+			if infoChart == {} then recieve(nil) end
+			
+			print("Enter microcontroller name:")
+			local name = io.read()
+			local index = -1
+
+			for i = 0, #infoChart do
+				if infoChart[i][1] == name then
+					index = i
+					break
+				end
+			end
+
+			if index ~= -1 then
+				fittedPrint(infoChart[index][2], true)
+			elseif index == -1 then
+				print("Incorrect name.")
+				os.sleep(5)
+			end
+		elseif option == 4 then
+			if infoChart == {} then recieve(nil) end
+			
+			print("Enter microcontroller name:")
+			local name = io.read()
+			local index = -1
+
+			for i = 0, #infoChart do
+				if infoChart[i][1] == name then
+					index = i
+					break
+				end
+			end
+
+			if index ~= -1 then
+				fittedPrint(infoChart[index][3], true)
+			elseif index == -1 then
+				print("Incorrect name.")
+				os.sleep(5)
+			end
+		elseif option == 5 then
+			if infoChart == {} then recieve(nil) end
+			
+			print("Enter microcontroller name:")
+			local name = io.read()
+			local index = -1
+
+			for i = 0, #infoChart do
+				if infoChart[i][1] == name then
+					index = i
+					break
+				end
+			end
+
+			if index ~= -1 then
+				fittedPrint(infoChart[index][4], true)
+			elseif index == -1 then
+				print("Incorrect name.")
+				os.sleep(5)
+			end
+		elseif option == 6 then
+			if infoChart == {} then recieve(nil) end
+			
+			print("Enter microcontroller name:")
+			local name = io.read()
+			local index = -1
+
+			for i = 0, #infoChart do
+				if infoChart[i][1] == name then
+					index = i
+					break
+				end
+			end
+
+			if index ~= -1 then
+				fittedPrint(infoChart[index][5])
+			elseif index == -1 then
+				print("Incorrect name.")
+				os.sleep(5)
+			end
+		elseif option == 7 then
+			if infoChart == {} then recieve(nil) end
+			
+			for i = 1, #infoChart do
+				print(infoChart[i][6], address)
+			end
+		end	
+	else
+		recieve(address)
+	end
+end
+
+local function manToggle(name, signal, address)
 	recieved = false
 
 	timerID = event.timer(timeOut, function()
 		modem.broadcast(port, "toggle-" .. name .. "-" .. tostring(signal))
+		os.sleep(timeOut)
 	end, iterationLimit)
 
 	if not recieved then
@@ -100,6 +288,7 @@ local function manUpdate(address)
 
 	timerID = event.timer(timeOut, function()
 		modem.broadcast(port, "update")
+		os.sleep(timeOut)
 	end, iterationLimit)
 	
 	if not recieved then
@@ -126,15 +315,20 @@ local function messageHandler(_, _, from, portFrom, _, message)
 		if message == "executed" then
 			event.cancel(timerID)
 			recieved = true
-		elseif message == "info" then
-
-		elseif message:sub(1, 5) == "info-" then
-
-		elseif message:sub(1, 5) == "done-" then
-			
+		elseif message:sub(1, 6) == "start-" or message:sub(1, 5) == "done-" then
+			event.cancel(timerID)
+			temp = message
+			recieved = false
+		elseif message:sub(1, 6) == "chunk-" then
+			if calledFromRemote then
+				modem.send(tmpAddr, port2, message)
+			else
+				local index, chunk = msg:match("^chunk%-(%d+)%-(.+)$")
+	            chunksRecieved[tonumber(index)] = chunk
+			end
 		end
 	elseif portFrom == port2 then		
-		if message:sub(1, 7) == "getInfo" then
+		if message:sub(1, 8) == "getInfo-" then
 			getInfo(from, message:sub(9))
 		elseif message:sub(1, 9) == "manToggle" then
 			local parts = {}
@@ -142,7 +336,7 @@ local function messageHandler(_, _, from, portFrom, _, message)
 				table.insert(parts, part)
 			end
 
-			manToggle(from, parts[2], parts[3])
+			manToggle(parts[2], parts[3], from)
 		elseif message == "manUpdate" then
 			manUpdate(from)
 		elseif message == "manReset" then
@@ -154,6 +348,7 @@ local function messageHandler(_, _, from, portFrom, _, message)
 end
 
 local function exit()
+	term.clear()
 	event.ignore("modem_message", messageHandler)
 	stop = true
 end
@@ -223,46 +418,56 @@ local function UI()
 		"For options 3-6, an index wil be displayed next to the values, this is for tracking the information as a set. Essentially say there is an item being tracked, minecraft:potato for instance, its the first item so its index is 1, in the other pages, anything with and index of 1 belongs to minecraft:potato, thus you can line up information."
 	}
 
+
 	local function printMenu(menu)
 		term.clear()
 		for i = 1, #menu do
-			print(menu[1])
+			print(menu[i])
 		end
 	end
 
-	local function fittedPrint(tableToPrint, addIndex)
-		term.clear()
-		local lines = 0
+	while not stop do
+		local choice
+		repeat
+			term.clear()
+			printMenu(mainMenu)
+			choice = tonumber(io.read())
+		until choice ~= nil and choice > 0 and choice < 7
 
-		for k, v in ipairs(tableToPrint) do
-			if addIndex then
-				v = k .. ": " .. v
-			end
-
-			local linesNeeded = math.ceil(#v / width)
-			local linesLeft = height - lines - 2 -- Reserve 2 lines for "Press any key"
-
-			if linesNeeded > linesLeft then
-				print("\nPress any key to continue")
-				while true do
-					local _, _, _, pn = event.pull("key_down")
-					if pn then break end
-					os.sleep(0)
-				end
+		if choice == 1 then
+			choice = nil
+			repeat
 				term.clear()
-				lines = 0
-			end
+				printMenu(helpMenu)
+				choice = tonumber(io.read())
+			until choice ~= nil and choice > 0 and choice < 9
 
-			print(v)
-			lines = lines + linesNeeded
-		end
+			getInfo(choice, nil)
+		elseif choice == 2 then
+			local name = nil
+			local signal = nil
+		
+			repeat
+				term.clear()
+				print("Enter microcontroller name")
+				name = io.read()
+			until name ~= nil
 
-		print("\nPress any key to return to the menu...")
-		while true do
-			local _, _, _, pn = event.pull("key_down")
-			if pn then break end
-			
-			os.sleep(0)
+			repeat
+				term.clear()
+				print("Enter the signal value (1-15)")
+				signal = tonumber(io.read())
+			until signal ~= nil and signal > 0 and signal < 16
+
+			manToggle(name, signal, nil)
+		elseif choice == 3 then
+			manReset(nil)
+		elseif choice == 4 then
+			manUpdate(nil)
+		elseif choice == 5 then
+			fittedPrint(helpMenu, fasle)
+		elseif choice == 6 then
+			exit()
 		end
 	end
 end
