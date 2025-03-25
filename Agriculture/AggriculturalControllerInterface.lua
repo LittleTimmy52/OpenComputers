@@ -59,14 +59,14 @@ if useData then
 	data = component.data
 end
 
-local function encr(decryptedData, password)
+local function encr(decryptedData)
 	local key = data.md5(password)
 	local iv = data.random(16)
 	local encryptedData = data.encrypt(decryptedData, key, iv)
 	return serialization.serialize({encrypted = encryptedData, iv = iv})
 end
 
-local function decr(encryptedData, password)
+local function decr(encryptedData)
 	local key = data.md5(password)
 	local decoded = serialization.unserialize(encryptedData)
 	return serialization.unserialize(data.decrypt(decoded.encrypted, key, decoded.iv))
@@ -93,7 +93,6 @@ local function fittedPrint(tableToPrint, addIndex)
 			v = k .. ": " .. v
 		end
 
-		-- Break the line into multiple chunks if it's too long
 		while #v > width do
 			local chunk = v:sub(1, width)  -- take the first 'width' characters
 			v = v:sub(width + 1)           -- remove the printed part
@@ -438,7 +437,7 @@ local function UI()
 			choice = nil
 			repeat
 				term.clear()
-				printMenu(helpMenu)
+				printMenu(dataMenu)
 				choice = tonumber(io.read())
 			until choice ~= nil and choice > 0 and choice < 9
 
