@@ -272,7 +272,7 @@ local function manToggle(name, signal, address)
 	recieved = false
 
 	timerID = event.timer(timeOut, function()
-		modem.broadcast(port, "toggle-" .. name .. "-" .. tostring(signal))
+		modem.send(controllerAddress, port, "toggle-" .. name .. "-" .. tostring(signal))
 		os.sleep(timeOut)
 	end, iterationLimit)
 
@@ -286,7 +286,7 @@ local function manUpdate(address)
 	recieved = false
 
 	timerID = event.timer(timeOut, function()
-		modem.broadcast(port, "update")
+		modem.send(controllerAddress, port, "update")
 		os.sleep(timeOut)
 	end, iterationLimit)
 	
@@ -300,7 +300,7 @@ local function manReset(address)
 	recieved = false
 
 	timerID = event.timer(timeOut, function()
-		modem.broadcast(port, "reset")
+		modem.send(controllerAddress, port, "reset")
 	end, iterationLimit)
 	
 	if not recieved then
@@ -340,8 +340,6 @@ local function messageHandler(_, _, from, portFrom, _, message)
 			manUpdate(from)
 		elseif message == "manReset" then
 			manReset(from)
-		elseif message == "role" then
-			modem.broadcast(port, "role")
 		end
 	end
 end
