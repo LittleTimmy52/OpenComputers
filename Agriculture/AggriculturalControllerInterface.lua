@@ -122,7 +122,7 @@ local function getInfo(option, address)
 	if option == 1 then
 		if address == nil then print("Please wait, getting names...") end
 
-		local iteration = 0
+		local iteration = 1
 		temp = ""
 
 		repeat
@@ -155,7 +155,7 @@ local function getInfo(option, address)
 
 			term.clear()
 		else
-			local iteration = 0
+			local iteration = 1
 			temp = ""
 			repeat
 				os.sleep(timeOut)
@@ -169,7 +169,7 @@ local function getInfo(option, address)
 		if tableIndex ~= nil then
 			if address == nil then print("Please wait getting info...") end
 
-			local iteration = 0
+			local iteration = 1
 			temp = ""
 
 			repeat
@@ -203,7 +203,7 @@ local function getInfo(option, address)
 
 			term.clear()
 		else
-			local iteration = 0
+			local iteration = 1
 			temp = ""
 			repeat
 				os.sleep(timeOut)
@@ -217,7 +217,7 @@ local function getInfo(option, address)
 		if tableIndex ~= nil then
 			if address == nil then print("Please wait getting info...") end
 
-			local iteration = 0
+			local iteration = 1
 			temp = ""
 
 			repeat
@@ -251,7 +251,7 @@ local function getInfo(option, address)
 
 			term.clear()
 		else
-			local iteration = 0
+			local iteration = 1
 			temp = ""
 			repeat
 				os.sleep(timeOut)
@@ -265,7 +265,7 @@ local function getInfo(option, address)
 		if tableIndex ~= nil then
 			if address == nil then print("Please wait getting info...") end
 
-			local iteration = 0
+			local iteration = 1
 			temp = ""
 
 			repeat
@@ -299,7 +299,7 @@ local function getInfo(option, address)
 
 			term.clear()
 		else
-			local iteration = 0
+			local iteration = 1
 			temp = ""
 			repeat
 				os.sleep(timeOut)
@@ -313,7 +313,7 @@ local function getInfo(option, address)
 		if tableIndex ~= nil then
 			if address == nil then print("Please wait getting info...") end
 
-			local iteration = 0
+			local iteration = 1
 			temp = ""
 
 			repeat
@@ -340,7 +340,7 @@ local function getInfo(option, address)
 	elseif option == 6 then
 		if address == nil then print("Please wait, getting addresses...") end
 
-		local iteration = 0
+		local iteration = 1
 		temp = ""
 
 		repeat
@@ -372,7 +372,7 @@ local function manToggle(name, signal, address)
 		print("Please wait...")
 	end
 
-	local iteration = 0
+	local iteration = 1
 	recieved = false
 
 	repeat
@@ -399,7 +399,7 @@ local function manReset(address)
 		print("Please wait...")
 	end
 
-	local iteration = 0
+	local iteration = 1
 	recieved = false
 
 	repeat

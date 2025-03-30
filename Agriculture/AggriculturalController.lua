@@ -11,7 +11,7 @@ local recieved = false
 local check
 
 local port = 2025
-local timeOut = 10
+local timeOut = 5
 local iterationLimit = 15
 local checkInterval = 15
 
@@ -35,7 +35,7 @@ if conf then
 else
 	require("filesystem").makeDirectory("/etc/AggriculturalController/")
 	conf = io.open("/etc/AggriculturalController/AggriculturalController.cfg", "w")
-	conf:write("port=2025\ntimeOut=10\niterationLimit=15\ncheckInterval=15")
+	conf:write("port=2025\ntimeOut=5\niterationLimit=15\ncheckInterval=15")
 	conf:close()
 end
 
@@ -69,8 +69,8 @@ local function toggle(name, signal)
 				end
 			end
 
-			if address then
-				local iteration = 0
+			if address and location ~= nil then
+				local iteration = 1
 				recieved = false
 
 				while not recieved and iteration < iterationLimit do
@@ -177,7 +177,7 @@ local function messageHandler(_, _, from, _, _, message)
 		end
 
 		local good = (tableIndex <= #infoChart and tableIndex > 0)
-		
+
 		if good then
 			if listSelection == 2 then
 				modem.send(from, port, "items-" .. serialization.serialize(infoChart[tableIndex][2]))
@@ -211,7 +211,7 @@ local function messageHandler(_, _, from, _, _, message)
 			table.insert(parts, part)
 		end
 
-		toggle(parts[2], parts[3])
+		toggle(parts[2], tonumber(parts[3]))
 		modem.send(from, port, "executed")
 	elseif message == "update" then
 		check:suspend()
