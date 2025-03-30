@@ -163,29 +163,48 @@ local function messageHandler(_, _, from, _, _, message)
 	elseif message == "reset" then
 		physicleReset()
 		modem.send(from, port, "executed")
-	elseif message == "getInfo" then
-		local serializedData = serialization.serialize(dataTable)
-		local maxSize = modem.maxPacketSize() - 10  -- leave room for prefixes
-		local chunks = {}
-		local packets = 0
-
-		-- split serialized data into chunks
-		for i = 1, #serializedData, maxSize do
-			table.insert(chunks, serializedData:sub(i, i + maxSize - 1))
-			packets = packets + 1
+	elseif message:sub(1, 8) == "getInfo-" then
+		local section = message:sub(9)
+		local listSelection
+		local tableIndex = 0
+		if tonumber(section) == 1 then
+			listSelection = 1
+		elseif tonumber(section) == 6 then
+			listSelection = 6
+		else
+			listSelection = tonumber(string.char(message:byte(9)))
+			tableIndex = tonumber(message:sub(11))
 		end
 
-		-- send data about the transmission
-		modem.send(address, port, "start-" .. tostring(packets))
+		local good = (tableIndex <= #infoChart and tableIndex > 0)
+		
+		if good then
+			if listSelection == 2 then
+				modem.send(from, port, "items-" .. serialization.serialize(infoChart[tableIndex][2]))
+			elseif listSelection == 3 then
+				modem.send(from, port, "signals-" .. serialization.serialize(infoChart[tableIndex][3]))
+			elseif listSelection == 4 then
+				modem.send(from, port, "status-" .. serialization.serialize(infoChart[tableIndex][4]))
+			elseif listSelection == 5 then
+				modem.send(from, port, "limits-" .. serialization.serialize(infoChart[tableIndex][5]))
+			end
+		else
+			if listSelection == 1 then
+				local names = {}
+				for i = 1, #infoChart do
+					table.insert(names, infoChart[i][1])
+				end
 
-		-- send each chunk with an index
-		for i, chunk in ipairs(chunks) do
-			modem.send(address, port, "chunk-" .. tostring(i) .. "-" .. chunk)
-			os.sleep(0.05)
+				modem.send(from, port, "names-" .. serialization.serialize(names))
+			elseif listSelection == 6 then
+				local addresses = {}
+				for i = 1, #infoChart do
+					table.insert(addresses, infoChart[i][6])
+				end
+
+				modem.send(from, port, "addresses-" .. serialization.serialize(addresses))
+			end
 		end
-
-		-- send completion
-		modem.send(address, port, "done-" .. tostring(packets))
 	elseif message:sub(1, 7) == "toggle-" then
 		local parts = {}
 		for part in string.gmatch(message, "([^-]+)") do

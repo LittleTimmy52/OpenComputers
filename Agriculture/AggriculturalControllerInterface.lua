@@ -6,12 +6,8 @@ local serialization = require("serialization")
 local gpu = component.gpu
 local data = nil
 
-local infoChart = {}	-- name-items it controlls-signal-status-limit-address (string-table-table-table-table-string)
-local timerID
 local recieved = false
 local temp = ""
-local chunksRecieved = {}
-local expected
 local stop = false
 local width, height = gpu.getResolution()
 local calledFromRemote = false
@@ -84,13 +80,13 @@ local function out(data, address)
 	end
 end
 
-local function fittedPrint(tableToPrint, addIndex)
+local function fittedPrint(tableToPrint, noIndex)
 	term.clear()
 	local lines = 0
 
 	for k, v in ipairs(tableToPrint) do
-		if addIndex then
-			v = k .. ": " .. v
+		if noIndex == false or noIndex == nil then
+			v = tostring(k) .. ": " .. v
 		end
 
 		while #v > width do
@@ -123,158 +119,267 @@ local function fittedPrint(tableToPrint, addIndex)
 end
 
 local function getInfo(option, address)
-	local function recieve(address)
-		infoChart = {}
+	if option == 1 then
+		if address == nil then print("Please wait, getting names...") end
+
+		local iteration = 0
 		temp = ""
 
-		timerID = event.timer(timeOut, function()
+		repeat
+			iteration = iteration + 1
+			modem.send(controllerAddress, port, "getInfo-1")
 			os.sleep(timeOut)
-		end, iterationLimit)
-		
-		if temp:sub(1, 6) == "start-" then
-			if address ~= nil then
-				modem.send(address, port2, temp)
-				calledFromRemote = true
-				tmpAddr = address
+		until temp:sub(1, 6) == "names-" or iteration > iterationLimit
+
+		if temp:sub(1, 6) == "names-" then
+			if address == nil then 
+				fittedPrint(serialization.unserialize(temp:sub(7)))
 			else
-				expected = tonumber(temp:sub(7))
-				timerID = event.timer(timeOut, function()
-					os.sleep(timeOut)
-				end, math.huge)
-
-				if temp:sub(1, 5) == "done-" then
-					if address ~= nil then
-						modem.send(address, port2, temp)
-						calledFromRemote = false
-					else
-						local receivedCount = tonumber(msg:match("^done%-(%d+)$"))
-
-						if receivedCount == expected and #chunksRecieved == expected then
-							local full = table.concat(chunksRecieved)
-							infoChart = serialization.unserialize(full)
-						else
-							print("Packet loss.")
-						end
-					end
+				if useData then
+					modem.send(address, port2, encr(temp:sub(7)))
+				else
+					modem.send(address, port2, temp:sub(7))
 				end
 			end
 		else
 			out("Could not reach the controller server (timed out, limit reached)", address)
 			os.sleep(5)
 		end
-	end
+	elseif option == 2 then
+		out("Please enter the index of the microcontroller.", address)
+		local tableIndex
+		if address == nil then
+			repeat
+				tableIndex = tonumber(io.read())
+			until tableIndex ~= nil and tableIndex > 0
 
-	if address == nil then
-		if option == 1 then
-			print("Please wait whilst we recieve the chart.")
-			recieve(nil)
-			print("recieved")
+			term.clear()
+		else
+			local iteration = 0
+			temp = ""
+			repeat
+				os.sleep(timeOut)
+			until tonumber(temp) ~= nil or iteration > iterationLimit
+	
+			if tonumber(temp) ~= nil then
+				tableIndex = tonumber(temp)
+			end
+		end
+
+		if tableIndex ~= nil then
+			if address == nil then print("Please wait getting info...") end
+
+			local iteration = 0
+			temp = ""
+
+			repeat
+				iteration = iteration + 1
+				modem.send(controllerAddress, port, "getInfo-2-" .. tableIndex)
+				os.sleep(timeOut)
+			until temp:sub(1, 6) == "items-" or iteration > iterationLimit
+
+			if temp:sub(1, 6) == "items-" then
+				if address == nil then 
+					fittedPrint(serialization.unserialize(temp:sub(7)))
+				else
+					if useData then
+						modem.send(address, port2, encr(temp:sub(7)))
+					else
+						modem.send(address, port2, temp:sub(7))
+					end
+				end
+			else
+				out("Could not reach the controller server (timed out, limit reached)", address)
+				os.sleep(5)
+			end
+		end
+	elseif option == 3 then
+		out("Please enter the index of the microcontroller.", address)
+		local tableIndex
+		if address == nil then
+			repeat
+				tableIndex = tonumber(io.read())
+			until tableIndex ~= nil and tableIndex > 0
+
+			term.clear()
+		else
+			local iteration = 0
+			temp = ""
+			repeat
+				os.sleep(timeOut)
+			until tonumber(temp) ~= nil or iteration > iterationLimit
+	
+			if tonumber(temp) ~= nil then
+				tableIndex = tonumber(temp)
+			end
+		end
+
+		if tableIndex ~= nil then
+			if address == nil then print("Please wait getting info...") end
+
+			local iteration = 0
+			temp = ""
+
+			repeat
+				iteration = iteration + 1
+				modem.send(controllerAddress, port, "getInfo-3-" .. tableIndex)
+				os.sleep(timeOut)
+			until temp:sub(1, 8) == "signals-" or iteration > iterationLimit
+
+			if temp:sub(1, 8) == "signals-" then
+				if address == nil then 
+					fittedPrint(serialization.unserialize(temp:sub(9)))
+				else
+					if useData then
+						modem.send(address, port2, encr(temp:sub(9)))
+					else
+						modem.send(address, port2, temp:sub(9))
+					end
+				end
+			else
+				out("Could not reach the controller server (timed out, limit reached)", address)
+				os.sleep(5)
+			end
+		end
+	elseif option == 4 then
+		out("Please enter the index of the microcontroller.", address)
+		local tableIndex
+		if address == nil then
+			repeat
+				tableIndex = tonumber(io.read())
+			until tableIndex ~= nil and tableIndex > 0
+
+			term.clear()
+		else
+			local iteration = 0
+			temp = ""
+			repeat
+				os.sleep(timeOut)
+			until tonumber(temp) ~= nil or iteration > iterationLimit
+	
+			if tonumber(temp) ~= nil then
+				tableIndex = tonumber(temp)
+			end
+		end
+
+		if tableIndex ~= nil then
+			if address == nil then print("Please wait getting info...") end
+
+			local iteration = 0
+			temp = ""
+
+			repeat
+				iteration = iteration + 1
+				modem.send(controllerAddress, port, "getInfo-4-" .. tableIndex)
+				os.sleep(timeOut)
+			until temp:sub(1, 7) == "status-" or iteration > iterationLimit
+
+			if temp:sub(1, 7) == "status-" then
+				if address == nil then 
+					fittedPrint(serialization.unserialize(temp:sub(8)))
+				else
+					if useData then
+						modem.send(address, port2, encr(temp:sub(8)))
+					else
+						modem.send(address, port2, temp:sub(8))
+					end
+				end
+			else
+				out("Could not reach the controller server (timed out, limit reached)", address)
+				os.sleep(5)
+			end
+		end
+	elseif option == 5 then
+		out("Please enter the index of the microcontroller.", address)
+		local tableIndex
+		if address == nil then
+			repeat
+				tableIndex = tonumber(io.read())
+			until tableIndex ~= nil and tableIndex > 0
+
+			term.clear()
+		else
+			local iteration = 0
+			temp = ""
+			repeat
+				os.sleep(timeOut)
+			until tonumber(temp) ~= nil or iteration > iterationLimit
+	
+			if tonumber(temp) ~= nil then
+				tableIndex = tonumber(temp)
+			end
+		end
+
+		if tableIndex ~= nil then
+			if address == nil then print("Please wait getting info...") end
+
+			local iteration = 0
+			temp = ""
+
+			repeat
+				iteration = iteration + 1
+				modem.send(controllerAddress, port, "getInfo-5-" .. tableIndex)
+				os.sleep(timeOut)
+			until temp:sub(1, 7) == "limits-" or iteration > iterationLimit
+
+			if temp:sub(1, 7) == "limits-" then
+				if address == nil then 
+					fittedPrint(serialization.unserialize(temp:sub(8)))
+				else
+					if useData then
+						modem.send(address, port2, encr(temp:sub(8)))
+					else
+						modem.send(address, port2, temp:sub(8))
+					end
+				end
+			else
+				out("Could not reach the controller server (timed out, limit reached)", address)
+				os.sleep(5)
+			end
+		end
+	elseif option == 6 then
+		if address == nil then print("Please wait, getting addresses...") end
+
+		local iteration = 0
+		temp = ""
+
+		repeat
+			iteration = iteration + 1
+			modem.send(controllerAddress, port, "getInfo-6")
+			os.sleep(timeOut)
+		until temp:sub(1, 10) == "addresses-" or iteration > iterationLimit
+
+		if temp:sub(1, 10) == "addresses-" then
+			if address == nil then 
+				fittedPrint(serialization.unserialize(temp:sub(11)))
+			else
+				if useData then
+					modem.send(address, port2, encr(temp:sub(11)))
+				else
+					modem.send(address, port2, temp:sub(11))
+				end
+			end
+		else
+			out("Could not reach the controller server (timed out, limit reached)", address)
 			os.sleep(5)
-		elseif option == 2 then
-			if infoChart == {} then recieve(nil) end
-
-			for i = 1, #infoChart do
-				print(infoChart[i][1], address)
-			end
-		elseif option == 3 then
-			if infoChart == {} then recieve(nil) end
-			
-			print("Enter microcontroller name:")
-			local name = io.read()
-			local index = -1
-
-			for i = 0, #infoChart do
-				if infoChart[i][1] == name then
-					index = i
-					break
-				end
-			end
-
-			if index ~= -1 then
-				fittedPrint(infoChart[index][2], true)
-			elseif index == -1 then
-				print("Incorrect name.")
-				os.sleep(5)
-			end
-		elseif option == 4 then
-			if infoChart == {} then recieve(nil) end
-			
-			print("Enter microcontroller name:")
-			local name = io.read()
-			local index = -1
-
-			for i = 0, #infoChart do
-				if infoChart[i][1] == name then
-					index = i
-					break
-				end
-			end
-
-			if index ~= -1 then
-				fittedPrint(infoChart[index][3], true)
-			elseif index == -1 then
-				print("Incorrect name.")
-				os.sleep(5)
-			end
-		elseif option == 5 then
-			if infoChart == {} then recieve(nil) end
-			
-			print("Enter microcontroller name:")
-			local name = io.read()
-			local index = -1
-
-			for i = 0, #infoChart do
-				if infoChart[i][1] == name then
-					index = i
-					break
-				end
-			end
-
-			if index ~= -1 then
-				fittedPrint(infoChart[index][4], true)
-			elseif index == -1 then
-				print("Incorrect name.")
-				os.sleep(5)
-			end
-		elseif option == 6 then
-			if infoChart == {} then recieve(nil) end
-			
-			print("Enter microcontroller name:")
-			local name = io.read()
-			local index = -1
-
-			for i = 0, #infoChart do
-				if infoChart[i][1] == name then
-					index = i
-					break
-				end
-			end
-
-			if index ~= -1 then
-				fittedPrint(infoChart[index][5])
-			elseif index == -1 then
-				print("Incorrect name.")
-				os.sleep(5)
-			end
-		elseif option == 7 then
-			if infoChart == {} then recieve(nil) end
-			
-			for i = 1, #infoChart do
-				print(infoChart[i][6], address)
-			end
-		end	
-	else
-		recieve(address)
-	end
+		end
+	end	
 end
 
 local function manToggle(name, signal, address)
+	if address == nil then
+		term.clear()
+		print("Please wait...")
+	end
+
+	local iteration = 0
 	recieved = false
 
-	timerID = event.timer(timeOut, function()
+	repeat
+		iteration = iteration + 1
 		modem.send(controllerAddress, port, "toggle-" .. name .. "-" .. tostring(signal))
-		os.sleep(timeOut)
-	end, iterationLimit)
+		if not recieved then os.sleep(timeOut) end
+	until recieved or iteration > iterationLimit
 
 	if not recieved then
 		out("Could not reach the controller server (timed out, limit reached)", address)
@@ -283,25 +388,25 @@ local function manToggle(name, signal, address)
 end
 
 local function manUpdate(address)
-	recieved = false
-
-	timerID = event.timer(timeOut, function()
-		modem.send(controllerAddress, port, "update")
-		os.sleep(timeOut)
-	end, iterationLimit)
-	
-	if not recieved then
-		out("Could not reach the controller server (timed out, limit reached)", address)
-		os.sleep(5)
-	end
+	out("Only sending once, large operation", address)
+	modem.send(controllerAddress, port, "update")
+	os.sleep(5)
 end
 
 local function manReset(address)
+	if address == nil then
+		term.clear()
+		print("Please wait...")
+	end
+
+	local iteration = 0
 	recieved = false
 
-	timerID = event.timer(timeOut, function()
+	repeat
+		iteration = iteration + 1
 		modem.send(controllerAddress, port, "reset")
-	end, iterationLimit)
+		if not recieved then os.sleep(timeOut) end
+	until recieved or iteration > iterationLimit
 	
 	if not recieved then
 		out("Could not reach the controller server (timed out, limit reached)", address)
@@ -310,21 +415,13 @@ local function manReset(address)
 end
 
 local function messageHandler(_, _, from, portFrom, _, message)
+	if useData and portFrom == port2 then message = decr(message) end
+
 	if portFrom == port then
 		if message == "executed" then
-			event.cancel(timerID)
 			recieved = true
-		elseif message:sub(1, 6) == "start-" or message:sub(1, 5) == "done-" then
-			event.cancel(timerID)
+		elseif message ~= "rolecall" then
 			temp = message
-			recieved = false
-		elseif message:sub(1, 6) == "chunk-" then
-			if calledFromRemote then
-				modem.send(tmpAddr, port2, message)
-			else
-				local index, chunk = msg:match("^chunk%-(%d+)%-(.+)$")
-	            chunksRecieved[tonumber(index)] = chunk
-			end
 		end
 	elseif portFrom == port2 then		
 		if message:sub(1, 8) == "getInfo-" then
@@ -340,6 +437,8 @@ local function messageHandler(_, _, from, portFrom, _, message)
 			manUpdate(from)
 		elseif message == "manReset" then
 			manReset(from)
+		elseif message:sub(1, 6) == "index-" then
+			temp = message:sub(7)
 		end
 	end
 end
@@ -363,14 +462,13 @@ local function UI()
 
 	local dataMenu = {
 		"Information:",
-		"[1] Update stored data",
-		"[2] Microcontroller names",
-		"[3] Items controlled",
-		"[4] Signal assignments",
-		"[5] Status",
-		"[6] Limits",
-		"[7] Addresses",
-		"[8] Main menu"
+		"[1] Microcontroller names",
+		"[2] Items controlled",
+		"[3] Signal assignments",
+		"[4] Status",
+		"[5] Limits",
+		"[6] Addresses",
+		"[7] Main menu"
 	}
 
 	local helpMenu = {
@@ -392,27 +490,25 @@ local function UI()
 		"[6] Exit program",
 		"Need I explain this one? Well if its not objious it closes the program.",
 		"Information:",
-		"[1] Update stored data",
-		"The information from the server is only updated when this is called or if its nil when selecting one fo the other options. Therefore you MUST select this option for more accurate information.",
-		"Note: This is dont this way because caching the information will cut the time for subsequent lookups down significantly.",
-		"[2] Microcontroller names",
+		"[1] Microcontroller names",
 		"This lists the names of all microcontrollers the controller controls.",
 		"Note: \"[2] Manual toggle\" on the main menu needs this along with the signal for the desired item (see \"[4] Signal assignments\").",
-		"[3] Items controlled",
+		"[2] Items controlled",
 		"This lists the item names in standard mod:item format the controller monitors per a specified microcontroller.",
-		"[4] Signal assignments",
+		"[3] Signal assignments",
 		"This lists the various signals that are assigned per a specified microcontroller.",
 		"Note: \"[2] Manual toggle\" on the main menu needs this along with the name for the desired item (see \"[2] Microcontroller names\").",
-		"[5] Status",
+		"[4] Status",
 		"This lists the status of the various monitered items per a specific microcontroller.",
-		"[6] Limits",
+		"[5] Limits",
 		"This lists the various limits of the various items per a specific microcontroller.",
-		"[7] Addresses",
+		"[6] Addresses",
 		"This lists the various addresses of the microcontrollers network cards.",
-		"[8] Main menu",
+		"[7] Main menu",
 		"Need I explain this? well, it takes you back to the main menu.",
 		"Special note in regards to the information pages:",
-		"For options 3-6, an index wil be displayed next to the values, this is for tracking the information as a set. Essentially say there is an item being tracked, minecraft:potato for instance, its the first item so its index is 1, in the other pages, anything with and index of 1 belongs to minecraft:potato, thus you can line up information."
+		"For all options an index wil be displayed next to the values, this is for tracking the information as a set. Essentially say there is an item being tracked, minecraft:potato for instance, its the first item so its index is 1, in the other pages, anything with and index of 1 belongs to minecraft:potato, thus you can line up information.",
+		"Additionally, the index associated to the name or address is nessicairy in choosing the correct microcontroller to view in the other options, say microcontroller \"test\" was at index 1, when seeing say the limits, you specify this index to see the data for this microcontroller."
 	}
 
 
@@ -437,9 +533,11 @@ local function UI()
 				term.clear()
 				printMenu(dataMenu)
 				choice = tonumber(io.read())
-			until choice ~= nil and choice > 0 and choice < 9
+			until choice ~= nil and choice > 0 and choice < 8
 
-			getInfo(choice, nil)
+			if choice ~= 7 then 
+				getInfo(choice, nil)
+			end
 		elseif choice == 2 then
 			local name = nil
 			local signal = nil
@@ -462,12 +560,15 @@ local function UI()
 		elseif choice == 4 then
 			manUpdate(nil)
 		elseif choice == 5 then
-			fittedPrint(helpMenu, fasle)
+			fittedPrint(helpMenu, true)
 		elseif choice == 6 then
 			exit()
 		end
 	end
 end
+
+modem.open(port)
+modem.open(port2)
 
 event.listen("modem_message", messageHandler)
 
