@@ -9,6 +9,7 @@ local thread = require("thread")
 local infoChart = {}	-- name-items it controlls-signal-status-limit-address (string-table-table-table-table-string)
 local recieved = false
 local check
+local checkOn = true
 
 local port = 2025
 local timeOut = 5
@@ -217,6 +218,16 @@ local function messageHandler(_, _, from, _, _, message)
 		check:suspend()
 		checkStorage()
 		check:resume()
+		modem.send(from, port, "executed")
+	elseif message == "checkToggle" then
+		checkOn = not checkOn
+
+		if checkOn then
+			check:resume()
+		else
+			check:suspend()
+		end
+
 		modem.send(from, port, "executed")
 	end
 end

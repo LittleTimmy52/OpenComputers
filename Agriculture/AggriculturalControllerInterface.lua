@@ -10,8 +10,6 @@ local recieved = false
 local temp = ""
 local stop = false
 local width, height = gpu.getResolution()
-local calledFromRemote = false
-local tmpAddr
 
 local port = 2025
 local timeOut = 10
@@ -136,13 +134,13 @@ local function getInfo(option, address)
 				fittedPrint(serialization.unserialize(temp:sub(7)))
 			else
 				if useData then
-					modem.send(address, port2, encr(temp:sub(7)))
+					modem.send(address, port2, encr(temp))
 				else
-					modem.send(address, port2, temp:sub(7))
+					modem.send(address, port2, temp)
 				end
 			end
 		else
-			out("Could not reach the controller server (timed out, limit reached)", address)
+			out("Error-Could not reach the controller server (timed out, limit reached)", address)
 			os.sleep(5)
 		end
 	elseif option == 2 then
@@ -183,13 +181,13 @@ local function getInfo(option, address)
 					fittedPrint(serialization.unserialize(temp:sub(7)))
 				else
 					if useData then
-						modem.send(address, port2, encr(temp:sub(7)))
+						modem.send(address, port2, encr(temp))
 					else
-						modem.send(address, port2, temp:sub(7))
+						modem.send(address, port2, temp)
 					end
 				end
 			else
-				out("Could not reach the controller server (timed out, limit reached)", address)
+				out("Error-Could not reach the controller server (timed out, limit reached)", address)
 				os.sleep(5)
 			end
 		end
@@ -231,13 +229,13 @@ local function getInfo(option, address)
 					fittedPrint(serialization.unserialize(temp:sub(9)))
 				else
 					if useData then
-						modem.send(address, port2, encr(temp:sub(9)))
+						modem.send(address, port2, encr(temp))
 					else
-						modem.send(address, port2, temp:sub(9))
+						modem.send(address, port2, temp)
 					end
 				end
 			else
-				out("Could not reach the controller server (timed out, limit reached)", address)
+				out("Error-Could not reach the controller server (timed out, limit reached)", address)
 				os.sleep(5)
 			end
 		end
@@ -279,13 +277,13 @@ local function getInfo(option, address)
 					fittedPrint(serialization.unserialize(temp:sub(8)))
 				else
 					if useData then
-						modem.send(address, port2, encr(temp:sub(8)))
+						modem.send(address, port2, encr(temp))
 					else
-						modem.send(address, port2, temp:sub(8))
+						modem.send(address, port2, temp)
 					end
 				end
 			else
-				out("Could not reach the controller server (timed out, limit reached)", address)
+				out("Error-Could not reach the controller server (timed out, limit reached)", address)
 				os.sleep(5)
 			end
 		end
@@ -327,13 +325,13 @@ local function getInfo(option, address)
 					fittedPrint(serialization.unserialize(temp:sub(8)))
 				else
 					if useData then
-						modem.send(address, port2, encr(temp:sub(8)))
+						modem.send(address, port2, encr(temp))
 					else
-						modem.send(address, port2, temp:sub(8))
+						modem.send(address, port2, temp)
 					end
 				end
 			else
-				out("Could not reach the controller server (timed out, limit reached)", address)
+				out("Error-Could not reach the controller server (timed out, limit reached)", address)
 				os.sleep(5)
 			end
 		end
@@ -354,13 +352,13 @@ local function getInfo(option, address)
 				fittedPrint(serialization.unserialize(temp:sub(11)))
 			else
 				if useData then
-					modem.send(address, port2, encr(temp:sub(11)))
+					modem.send(address, port2, encr(temp))
 				else
-					modem.send(address, port2, temp:sub(11))
+					modem.send(address, port2, temp)
 				end
 			end
 		else
-			out("Could not reach the controller server (timed out, limit reached)", address)
+			out("Error-Could not reach the controller server (timed out, limit reached)", address)
 			os.sleep(5)
 		end
 	end	
@@ -382,7 +380,7 @@ local function manToggle(name, signal, address)
 	until recieved or iteration > iterationLimit
 
 	if not recieved then
-		out("Could not reach the controller server (timed out, limit reached)", address)
+		out("Error-Could not reach the controller server (timed out, limit reached)", address)
 		os.sleep(5)
 	end
 end
@@ -409,7 +407,28 @@ local function manReset(address)
 	until recieved or iteration > iterationLimit
 	
 	if not recieved then
-		out("Could not reach the controller server (timed out, limit reached)", address)
+		out("Error-Could not reach the controller server (timed out, limit reached)", address)
+		os.sleep(5)
+	end
+end
+
+local function toggleUpdate(address)
+	if address == nil then
+		term.clear()
+		print("Please wait...")
+	end
+
+	local iteration = 1
+	recieved = false
+
+	repeat
+		iteration = iteration + 1
+		modem.send(controllerAddress, port, "checkToggle")
+		if not recieved then os.sleep(timeOut) end
+	until recieved or iteration > iterationLimit
+	
+	if not recieved then
+		out("Error-Could not reach the controller server (timed out, limit reached)", address)
 		os.sleep(5)
 	end
 end
@@ -425,20 +444,22 @@ local function messageHandler(_, _, from, portFrom, _, message)
 		end
 	elseif portFrom == port2 then		
 		if message:sub(1, 8) == "getInfo-" then
-			getInfo(from, message:sub(9))
-		elseif message:sub(1, 9) == "manToggle" then
+			getInfo(from, tonumber(message:sub(9)))
+		elseif message:sub(1, 10) == "manToggle-" then
 			local parts = {}
 			for part in string.gmatch(message, "([^-]+)") do
 				table.insert(parts, part)
 			end
 
-			manToggle(parts[2], parts[3], from)
+			manToggle(parts[2], tonumber(parts[3]), from)
 		elseif message == "manUpdate" then
 			manUpdate(from)
 		elseif message == "manReset" then
 			manReset(from)
-		elseif message:sub(1, 6) == "index-" then
-			temp = message:sub(7)
+		elseif message:sub(1, 7) == "option-" then
+			temp = message:sub(8)
+		elseif message == "checkToggle" then
+			toggleUpdate(from)
 		end
 	end
 end
@@ -456,8 +477,9 @@ local function UI()
 		"[2] Manual toggle",
 		"[3] Manual reset",
 		"[4] Manual update",
-		"[5] Help",
-		"[6] Exit program"
+		"[5] Toggle updates",
+		"[6] Help",
+		"[7] Exit program"
 	}
 
 	local dataMenu = {
@@ -485,9 +507,12 @@ local function UI()
 		"[4] Manual update",
 		"This tells the controller to run its update scan.",
 		"Note: The controller automatically runs its update scan, but this is here if you want to run it for your self.",
-		"[5] Help",
+		"[5] Toggle updates",
+		"This toggles weather or not the controller is checking the storage or not.",
+		"Note: don't forget it toggled off or you'd over fill some items or run out. \"[4] Manual update\" restarts it, so if youre not sure, manual toggle",
+		"[6] Help",
 		"Shows this very insightful menu.",
-		"[6] Exit program",
+		"[7] Exit program",
 		"Need I explain this one? Well if its not objious it closes the program.",
 		"Information:",
 		"[1] Microcontroller names",
@@ -525,7 +550,7 @@ local function UI()
 			term.clear()
 			printMenu(mainMenu)
 			choice = tonumber(io.read())
-		until choice ~= nil and choice > 0 and choice < 7
+		until choice ~= nil and choice > 0 and choice < 8
 
 		if choice == 1 then
 			choice = nil
@@ -560,8 +585,10 @@ local function UI()
 		elseif choice == 4 then
 			manUpdate(nil)
 		elseif choice == 5 then
-			fittedPrint(helpMenu, true)
+			toggleUpdate(nil)
 		elseif choice == 6 then
+			fittedPrint(helpMenu, true)
+		elseif choice == 7 then
 			exit()
 		end
 	end
