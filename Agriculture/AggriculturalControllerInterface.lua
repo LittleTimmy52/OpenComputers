@@ -444,7 +444,7 @@ local function messageHandler(_, _, from, portFrom, _, message)
 		end
 	elseif portFrom == port2 then		
 		if message:sub(1, 8) == "getInfo-" then
-			getInfo(from, tonumber(message:sub(9)))
+			getInfo(tonumber(message:sub(9)), from)
 		elseif message:sub(1, 10) == "manToggle-" then
 			local parts = {}
 			for part in string.gmatch(message, "([^-]+)") do

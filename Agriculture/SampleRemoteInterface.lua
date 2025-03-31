@@ -27,7 +27,7 @@ end
 local function decr(encryptedData)
 	local key = data.md5(password)
 	local decoded = serialization.unserialize(encryptedData)
-	return serialization.unserialize(data.decrypt(decoded.encrypted, key, decoded.iv))
+	return data.decrypt(decoded.encrypted, key, decoded.iv)
 end
 
 local function fittedPrint(tableToPrint, noIndex)
@@ -81,9 +81,8 @@ local function sendOption(address)
 	end
 end
 
-local function messageHandler(_, _, from, portFrom, _, message)
+local function messageHandler(_, _, from, _, _, message)
 	if useData then message = decr(message) end
-	-- error- Please Only names- items- signals- status- limits- addresses-
 	if message:sub(1, 6) == "names-" then
 		fittedPrint(serialization.unserialize(message:sub(7)))
 	elseif message:sub(1, 6) == "items-" then
@@ -111,10 +110,19 @@ modem.open(port)
 event.listen("modem_message", messageHandler)
 
 while not stop do
+	term.clear()
+	print("Main Menu:")
+	print("[1] Get information")
+	print("[2] Manual toggle")
+	print("[3] Manual reset")
+	print("[4] Manual update")
+	print("[5] Toggle updates")
+	print("[6] Exit program")
+
 	local choice
 	repeat
 		term.clear()
-		print("Pleaseselect an option:")
+		print("Main Menu:")
 		print("[1] Get information")
 		print("[2] Manual toggle")
 		print("[3] Manual reset")
