@@ -1,4 +1,4 @@
-# riculture
+# Agriculture
 ## Purpose
 The programs here are for controlling agriculture output based on the ammounts in a refined storage
 inventory system. It is intended to be a wired connection to keep the system secure as with wireless
@@ -28,9 +28,6 @@ the controllers perfectly or issues may arise. This is designed to be wired into
 and the back connected via redstone to the toggle mechanism to reset everything physically.
 
 Note: Any change made microcontroller wise warrents this program to be closed and restarted.
-
-IMPORTANT: Please ensure the itmeout is a good bit less than that of the interface or when you
-manually toggle an item it will loop till it hits its iteration limit and toggles it that many times
 
 ### AgriculturalControllerInterface
 This is an interface program for the controller as the name suggests, it is meant to run on either a

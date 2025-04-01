@@ -12,7 +12,7 @@ local stop = false
 local width, height = gpu.getResolution()
 
 local port = 2025
-local timeOut = 10
+local timeOut = 5
 local iterationLimit = 15
 local useData = true
 local password = "SecurePresharedPassword"
@@ -45,7 +45,7 @@ if conf then
 else
 	require("filesystem").makeDirectory("/etc/AgriculturalController/")
 	conf = io.open("/etc/AgriculturalController/AgriculturalControllerInterface.cfg", "w")
-	conf:write("port=2025\ntimeOut=10\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234")
+	conf:write("port=2025\ntimeOut=5\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234/ncontrollerAddress=network card address here")
 	conf:close()
 end
 
@@ -410,6 +410,8 @@ local function manToggle(name, signal, address)
 		cancleableSleep(timeOut)
 	until recieved or iteration > iterationLimit
 
+	if recieved and address ~= nil then modem.send(address, port2, "executed") end
+
 	if not recieved then
 		out("Error-Could not reach the controller server (timed out, limit reached)", address)
 		os.sleep(5)
@@ -436,6 +438,8 @@ local function manReset(address)
 		modem.send(controllerAddress, port, "reset")
 		cancleableSleep(timeOut)
 	until recieved or iteration > iterationLimit
+
+	if recieved and address ~= nil then modem.send(address, port2, "executed") end
 	
 	if not recieved then
 		out("Error-Could not reach the controller server (timed out, limit reached)", address)
@@ -457,6 +461,8 @@ local function toggleUpdate(address)
 		modem.send(controllerAddress, port, "checkToggle")
 		cancleableSleep(timeOut)
 	until recieved or iteration > iterationLimit
+
+	if recieved and address ~= nil then modem.send(address, port2, "executed") end
 	
 	if not recieved then
 		out("Error-Could not reach the controller server (timed out, limit reached)", address)
