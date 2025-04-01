@@ -116,17 +116,27 @@ local function fittedPrint(tableToPrint, noIndex)
 	event.pull("key_down")
 end
 
+local function cancleableSleep(time)
+	local intervalTime = 0.5
+	local iterationsNeeded = math.ceil(time / intervalTime)
+	for i = 1, iterationsNeeded do
+		os.sleep(intervalTime)
+		if recieved then break end
+	end
+end
+
 local function getInfo(option, address)
 	if option == 1 then
 		if address == nil then print("Please wait, getting names...") end
 
 		local iteration = 1
 		temp = ""
+		recieved = false
 
 		repeat
 			iteration = iteration + 1
 			modem.send(controllerAddress, port, "getInfo-1")
-			os.sleep(timeOut)
+			cancleableSleep(timeOut)
 		until temp:sub(1, 6) == "names-" or iteration > iterationLimit
 
 		if temp:sub(1, 6) == "names-" then
@@ -148,6 +158,8 @@ local function getInfo(option, address)
 		local tableIndex
 		if address == nil then
 			repeat
+				term.clear()
+				print("Please enter the index of the microcontroller.")
 				tableIndex = tonumber(io.read())
 			until tableIndex ~= nil and tableIndex > 0
 
@@ -155,8 +167,10 @@ local function getInfo(option, address)
 		else
 			local iteration = 1
 			temp = ""
+			recieved = false
+
 			repeat
-				os.sleep(timeOut)
+				cancleableSleep(timeOut)
 			until tonumber(temp) ~= nil or iteration > iterationLimit
 	
 			if tonumber(temp) ~= nil then
@@ -169,11 +183,12 @@ local function getInfo(option, address)
 
 			local iteration = 1
 			temp = ""
+			recieved = false
 
 			repeat
 				iteration = iteration + 1
 				modem.send(controllerAddress, port, "getInfo-2-" .. tableIndex)
-				os.sleep(timeOut)
+				cancleableSleep(timeOut)
 			until temp:sub(1, 6) == "items-" or iteration > iterationLimit
 
 			if temp:sub(1, 6) == "items-" then
@@ -196,6 +211,8 @@ local function getInfo(option, address)
 		local tableIndex
 		if address == nil then
 			repeat
+				term.clear()
+				print("Please enter the index of the microcontroller.")
 				tableIndex = tonumber(io.read())
 			until tableIndex ~= nil and tableIndex > 0
 
@@ -203,8 +220,10 @@ local function getInfo(option, address)
 		else
 			local iteration = 1
 			temp = ""
+			recieved = false
+
 			repeat
-				os.sleep(timeOut)
+				cancleableSleep(timeOut)
 			until tonumber(temp) ~= nil or iteration > iterationLimit
 	
 			if tonumber(temp) ~= nil then
@@ -217,11 +236,12 @@ local function getInfo(option, address)
 
 			local iteration = 1
 			temp = ""
+			recieved = false
 
 			repeat
 				iteration = iteration + 1
 				modem.send(controllerAddress, port, "getInfo-3-" .. tableIndex)
-				os.sleep(timeOut)
+				cancleableSleep(timeOut)
 			until temp:sub(1, 8) == "signals-" or iteration > iterationLimit
 
 			if temp:sub(1, 8) == "signals-" then
@@ -244,6 +264,8 @@ local function getInfo(option, address)
 		local tableIndex
 		if address == nil then
 			repeat
+				term.clear()
+				print("Please enter the index of the microcontroller.")
 				tableIndex = tonumber(io.read())
 			until tableIndex ~= nil and tableIndex > 0
 
@@ -251,8 +273,10 @@ local function getInfo(option, address)
 		else
 			local iteration = 1
 			temp = ""
+			recieved = false
+
 			repeat
-				os.sleep(timeOut)
+				cancleableSleep(timeOut)
 			until tonumber(temp) ~= nil or iteration > iterationLimit
 	
 			if tonumber(temp) ~= nil then
@@ -265,11 +289,12 @@ local function getInfo(option, address)
 
 			local iteration = 1
 			temp = ""
+			recieved = false
 
 			repeat
 				iteration = iteration + 1
 				modem.send(controllerAddress, port, "getInfo-4-" .. tableIndex)
-				os.sleep(timeOut)
+				cancleableSleep(timeOut)
 			until temp:sub(1, 7) == "status-" or iteration > iterationLimit
 
 			if temp:sub(1, 7) == "status-" then
@@ -292,6 +317,8 @@ local function getInfo(option, address)
 		local tableIndex
 		if address == nil then
 			repeat
+				term.clear()
+				print("Please enter the index of the microcontroller.")
 				tableIndex = tonumber(io.read())
 			until tableIndex ~= nil and tableIndex > 0
 
@@ -299,8 +326,10 @@ local function getInfo(option, address)
 		else
 			local iteration = 1
 			temp = ""
+			recieved = false
+
 			repeat
-				os.sleep(timeOut)
+				cancleableSleep(timeOut)
 			until tonumber(temp) ~= nil or iteration > iterationLimit
 	
 			if tonumber(temp) ~= nil then
@@ -313,11 +342,12 @@ local function getInfo(option, address)
 
 			local iteration = 1
 			temp = ""
+			recieved = false
 
 			repeat
 				iteration = iteration + 1
 				modem.send(controllerAddress, port, "getInfo-5-" .. tableIndex)
-				os.sleep(timeOut)
+				cancleableSleep(timeOut)
 			until temp:sub(1, 7) == "limits-" or iteration > iterationLimit
 
 			if temp:sub(1, 7) == "limits-" then
@@ -340,11 +370,12 @@ local function getInfo(option, address)
 
 		local iteration = 1
 		temp = ""
+		recieved = false
 
 		repeat
 			iteration = iteration + 1
 			modem.send(controllerAddress, port, "getInfo-6")
-			os.sleep(timeOut)
+			cancleableSleep(timeOut)
 		until temp:sub(1, 10) == "addresses-" or iteration > iterationLimit
 
 		if temp:sub(1, 10) == "addresses-" then
@@ -376,7 +407,7 @@ local function manToggle(name, signal, address)
 	repeat
 		iteration = iteration + 1
 		modem.send(controllerAddress, port, "toggle-" .. name .. "-" .. tostring(signal))
-		if not recieved then os.sleep(timeOut) end
+		cancleableSleep(timeOut)
 	until recieved or iteration > iterationLimit
 
 	if not recieved then
@@ -403,7 +434,7 @@ local function manReset(address)
 	repeat
 		iteration = iteration + 1
 		modem.send(controllerAddress, port, "reset")
-		if not recieved then os.sleep(timeOut) end
+		cancleableSleep(timeOut)
 	until recieved or iteration > iterationLimit
 	
 	if not recieved then
@@ -424,7 +455,7 @@ local function toggleUpdate(address)
 	repeat
 		iteration = iteration + 1
 		modem.send(controllerAddress, port, "checkToggle")
-		if not recieved then os.sleep(timeOut) end
+		cancleableSleep(timeOut)
 	until recieved or iteration > iterationLimit
 	
 	if not recieved then
@@ -440,6 +471,7 @@ local function messageHandler(_, _, from, portFrom, _, message)
 		if message == "executed" then
 			recieved = true
 		elseif message ~= "rolecall" then
+			recieved = true
 			temp = message
 		end
 	elseif portFrom == port2 then		

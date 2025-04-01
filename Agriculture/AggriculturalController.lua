@@ -40,6 +40,15 @@ else
 	conf:close()
 end
 
+local function cancleableSleep(time)
+	local intervalTime = 0.5
+	local iterationsNeeded = math.ceil(time / intervalTime)
+	for i = 1, iterationsNeeded do
+		os.sleep(intervalTime)
+		if recieved then break end
+	end
+end
+
 local function physicleReset()
 	-- output on back of computer the signal
 	redstone.setOutput(2, 15)
@@ -77,7 +86,7 @@ local function toggle(name, signal)
 				while not recieved and iteration < iterationLimit do
 					modem.send(address, port, name .. "-toggle-" .. signal)
 					iteration = iteration + 1
-					if not recieved then os.sleep(timeOut) end
+					cancleableSleep(timeOut)
 				end
 
 				if recieved then
