@@ -33,9 +33,6 @@ and the back connected via redstone to the toggle mechanism to reset everything 
 
 Note: Any change made microcontroller wise warrents this program to be closed and restarted.
 
-IMPORTANT: Please ensure the itmeout is a good bit less than that of the interface or when you
-manually toggle an item it will loop till it hits its iteration limit and toggles it that many times
-
 ### AggriculturalControllerInterface
 This is an interface program for the controller as the name suggests, it is meant to run on either a
 tier 2 computer or tier 1 server because of the tier 2 data card, but thats configurable in the config.
