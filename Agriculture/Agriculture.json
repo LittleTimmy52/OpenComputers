@@ -1,0 +1,34 @@
+{
+	"files": [
+		[
+			"AgriculturalController.lua",
+			"/home/AgriculturePackage/usr/bin/"
+		],
+		[
+			"AgriculturalControllerInterface.lua",
+			"/home/AgriculturePackage/usr/bin/"
+		],
+		[
+			"RedstoneSwitch.lua",
+			"/home/AgriculturePackage/usr/bin/"
+		],
+		[
+			"SampleRemoteInterface.lua",
+			"/home/AgriculturePackage/usr/bin/"
+		],
+		[
+			"README.md",
+			"/home/AgriculturePackage/"
+		]
+	],
+	"config": [
+		[
+			"AgriculturalController.cfg",
+			"/home/AgriculturePackage/etc/AgriculturalController/"
+		],
+		[
+			"AgriculturalControllerInterface.cfg",
+			"/home/AgriculturePackage/etc/AgriculturalController/"
+		]
+	]
+}

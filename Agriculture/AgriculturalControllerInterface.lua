@@ -20,7 +20,7 @@ local port2 = 1234
 local controllerAddress = "network card address here"
 
 -- load conf
-local conf = io.open("/etc/AggriculturalController/AggriculturalControllerInterface.cfg", "r")
+local conf = io.open("/etc/AgriculturalController/AgriculturalControllerInterface.cfg", "r")
 if conf then
 	for line in conf:lines() do
 		local k, v = line:match("^(%w+)%s*=%s*(%S+)$")
@@ -43,8 +43,8 @@ if conf then
 
 	conf:close()
 else
-	require("filesystem").makeDirectory("/etc/AggriculturalController/")
-	conf = io.open("/etc/AggriculturalController/AggriculturalControllerInterface.cfg", "w")
+	require("filesystem").makeDirectory("/etc/AgriculturalController/")
+	conf = io.open("/etc/AgriculturalController/AgriculturalControllerInterface.cfg", "w")
 	conf:write("port=2025\ntimeOut=10\niterationLimit=15\nuseData=true\npassword=SecurePresharedPassword\nport2=1234")
 	conf:close()
 end
@@ -527,7 +527,7 @@ local function UI()
 
 	local helpMenu = {
 		"Help:",
-		"This is the interface for \"AggriculturalController,\" this program just tells the controller what to do because the controller is fully automated and can only be interacted this way over the network.",
+		"This is the interface for \"AgriculturalController,\" this program just tells the controller what to do because the controller is fully automated and can only be interacted this way over the network.",
 		"Main Menu:",
 		"[1] Get information",
 		"Takes you to a sub menu to find out specific information the controller has at its disposal.",

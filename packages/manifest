@@ -105,7 +105,7 @@
 	["BankTransfer"] = {
 		["manifestVersion"] = "1.0",
 		["package"] = "BankTransfer",
-		["version"] = "1.0.1",
+		["version"] = "1.0.2",
 		["name"] = "BankTransfer",
 		["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/BankTransfer",
 		["description"] = "A way to transfer funds",

@@ -1,0 +1,9 @@
+{
+	["manifestVersion"] = "1.0",
+	["package"] = "Agriculture",
+	["version"] = "1.0.0",
+	["name"] = "Agriculture",
+	["repo"] = "https://github.com/LittleTimmy52/OpenComputers/tree/master/Agriculture",
+	["description"] = "Collection of scripts to control agriculture",
+	["authors"] = "LittleTimmy52"
+}

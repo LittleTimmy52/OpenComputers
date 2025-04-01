@@ -17,7 +17,7 @@ local iterationLimit = 15
 local checkInterval = 15
 
 -- load conf
-local conf = io.open("/etc/AggriculturalController/AggriculturalController.cfg", "r")
+local conf = io.open("/etc/AgriculturalController/AgriculturalController.cfg", "r")
 if conf then
 	for line in conf:lines() do
 		local k, v = line:match("^(%w+)%s*=%s*(%S+)$")
@@ -34,8 +34,8 @@ if conf then
 
 	conf:close()
 else
-	require("filesystem").makeDirectory("/etc/AggriculturalController/")
-	conf = io.open("/etc/AggriculturalController/AggriculturalController.cfg", "w")
+	require("filesystem").makeDirectory("/etc/AgriculturalController/")
+	conf = io.open("/etc/AgriculturalController/AgriculturalController.cfg", "w")
 	conf:write("port=2025\ntimeOut=5\niterationLimit=15\ncheckInterval=15")
 	conf:close()
 end

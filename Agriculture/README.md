@@ -1,10 +1,6 @@
-# Aggriculture
-
-## Special note
-I am currently working onthe interface stuff, as of now im just making a whole new set of intercace stuff ill clean things up later
-
+# riculture
 ## Purpose
-The programs here are for controlling aggriculture output based on the ammounts in a refined storage
+The programs here are for controlling agriculture output based on the ammounts in a refined storage
 inventory system. It is intended to be a wired connection to keep the system secure as with wireless
 networks are subject to interference and bad actors, I did not make any secure connection protocol to
 make it hack proof. However, the server communication with the interface or other systems will be.
@@ -22,7 +18,7 @@ for example minecraft:dirt-1-1000 dirt is assigned to a redstone stregnth of 1 a
 1000. Then after that place a sign on the front with the name then on the next line the port.
 Names for the microcontroller must be unique or issues may arise
 
-## AggriculturalController
+## AgriculturalController
 This program is a program designed to be placed on a T1 server. To set it up, just install it
 and edit the config to your liking, You need a network card, and redstone card, all
 the other components can be whatever level you wish. This is the brain of the system, it holds the
@@ -36,7 +32,7 @@ Note: Any change made microcontroller wise warrents this program to be closed an
 IMPORTANT: Please ensure the itmeout is a good bit less than that of the interface or when you
 manually toggle an item it will loop till it hits its iteration limit and toggles it that many times
 
-### AggriculturalControllerInterface
+### AgriculturalControllerInterface
 This is an interface program for the controller as the name suggests, it is meant to run on either a
 tier 2 computer or tier 1 server because of the tier 2 data card, but thats configurable in the config.
 Given the autanomus nature of the controller, you cant manually do anything, so using its event driven

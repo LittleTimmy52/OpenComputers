@@ -70,7 +70,7 @@ Images converted for a image display program
 ### ComputronicsMusic
 music converted for computronics tapes
 
-### Addriculture
+### Agriculture
 This holds the mess of scripts for my crop farms and such
 
 ## To do
