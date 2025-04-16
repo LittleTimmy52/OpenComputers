@@ -1,0 +1,3 @@
+https://raw.githubusercontent.com/LittleTimmy52/OpenComputers/refs/heads/master/BaseControl/Utilities/DiskSetup.lua
+https://raw.githubusercontent.com/LittleTimmy52/OpenComputers/refs/heads/master/BaseControl/Utilities/DriverUpload.lua
+https://raw.githubusercontent.com/LittleTimmy52/OpenComputers/refs/heads/master/BaseControl/Utilities/InstallationTool.lua
